@@ -1,0 +1,3 @@
+[submodule "lib/ast"]
+	path = lib/ast
+	url = git@github.com:socialimageapp/adventurai-shared-types.git

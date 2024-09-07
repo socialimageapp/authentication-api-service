@@ -1,0 +1,53 @@
+{
+	"env": {
+		"browser": true,
+		"es2021": true,
+		"node": true
+	},
+	"extends": [
+		"prettier",
+		"eslint:recommended",
+		"plugin:import/errors",
+		"plugin:import/warnings",
+		"plugin:@typescript-eslint/recommended"
+	],
+	"parserOptions": {
+		"ecmaFeatures": { "jsx": true },
+		"ecmaVersion": 12,
+		"sourceType": "module",
+		"project": ["./tsconfig.json"]
+	},
+
+	"settings": {
+		"import/resolver": {
+			"node": {
+				"extensions": [".js", ".jsx", ".ts", ".tsx"],
+				"paths": ["./src", ".config/scripts/", "amplify/**/*"]
+			}
+		}
+	},
+	"overrides": [{ "files": ["*.ts", "*.tsx"], "rules": { "no-undef": "error" } }],
+	"globals": { "process": true, "JSX": true },
+	"plugins": ["header"],
+	"rules": {
+		"prefer-const": 2,
+		"no-var": 2,
+		"@typescript-eslint/no-unnecessary-condition": 2,
+		"no-mixed-spaces-and-tabs": 0,
+		"import/no-anonymous-default-export": "off",
+		"header/header": [2, ".config/header.js"],
+		"no-console": 2,
+		"import/no-cycle": 0,
+		"import/no-unresolved": 0,
+		"@typescript-eslint/no-unused-vars": 2,
+		"@typescript-eslint/explicit-function-return-type": 0,
+		"@typescript-eslint/no-explicit-any": 0,
+		"@typescript-eslint/consistent-type-definitions": ["error", "interface"],
+		"@typescript-eslint/consistent-type-imports": [
+			"error",
+			{ "fixStyle": "separate-type-imports" }
+		],
+		"quotes": ["error", "double"],
+		"semi": ["error", "always"]
+	}
+}
