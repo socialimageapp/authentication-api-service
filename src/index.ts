@@ -5,13 +5,13 @@ import express from "express";
 import path from "path";
 import { readdir, stat } from "fs/promises";
 import { fileURLToPath, pathToFileURL } from "url";
-import setupSwagger from "./api/swagger.js";
 import { AppError } from "./api/baseRouter.js";
 import config from "./api/config.js";
+import setupSwaggerForVersion from "./api/swagger.js";
 
 const app = express();
 
-setupSwagger(app);
+setupSwaggerForVersion(app, "v1");
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);

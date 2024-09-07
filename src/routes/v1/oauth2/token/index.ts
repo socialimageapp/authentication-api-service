@@ -3,9 +3,7 @@
  */
 
 import type { Request, Response } from "express";
-import baseRouter from "src/api/baseRouter.js";
-
-const router = baseRouter;
+import router from "src/api/baseRouter.js";
 
 router.get("/oauth2/token", (req: Request, res: Response) => {
 	res.send("Token exchange");

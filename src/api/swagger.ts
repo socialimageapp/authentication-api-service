@@ -2,15 +2,17 @@
  * Copyright (c) 2020-2024, Social Image Ltd. All rights reserved.
  */
 import swaggerUi from "swagger-ui-express";
-import type { Express } from "express";
 import fs from "fs/promises";
 import path from "path";
 import deepmerge from "deepmerge";
 import { fileURLToPath } from "url";
+import type { Router } from "express";
+import config from "./config.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-// Utility function to load and merge partial OpenAPI files
+
+// Utility function to load and merge partial OpenAPI files for each version
 const loadPartialOpenAPI = async (dirPath: string): Promise<any> => {
 	let openAPIDoc = { openapi: "3.0.0", info: {}, paths: {} };
 
@@ -33,23 +35,28 @@ const loadPartialOpenAPI = async (dirPath: string): Promise<any> => {
 	return openAPIDoc;
 };
 
-const setupSwagger = async (app: Express) => {
+// Setup Swagger UI for specific versions
+const setupSwaggerForVersion = async (app: Router, versionPath: string) => {
+	const versionedBasePath =
+		config.basePath[versionPath as keyof typeof config.basePath];
 	const baseOpenAPI = {
 		openapi: "3.0.0",
 		info: {
-			title: "My Express API",
-			version: "1.0.0",
-			description: "API documentation for the Express app",
+			title: "Authentication API Service Documentation ",
+			version: versionPath,
+			description: `API documentation for ${versionPath}`,
 		},
-		servers: [
-			{
-				url: "http://localhost:3000",
-			},
-		],
+		servers: [{ url: `http://localhost:3000${versionedBasePath}` }],
 	};
-	const routesOpenAPI = await loadPartialOpenAPI(path.join(__dirname, "../routes"));
+
+	// Load partial OpenAPI definitions from the versioned routes folder
+	const routesOpenAPI = await loadPartialOpenAPI(path.join(__dirname, "../routes/v1"));
 	const swaggerSpec = deepmerge(baseOpenAPI, routesOpenAPI);
-	app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+	// Serve Swagger UI for the specific version
+	console.log("Setting up Swagger UI for version", `${versionedBasePath}/docs`);
+	app.use(`${versionedBasePath}/docs`, swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+	return app;
 };
 
-export default setupSwagger;
+export default setupSwaggerForVersion;

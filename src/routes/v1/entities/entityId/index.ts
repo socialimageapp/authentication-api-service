@@ -3,9 +3,7 @@
  */
 
 import type { Request, Response } from "express";
-import baseRouter from "src/api/baseRouter.js";
-
-const router = baseRouter;
+import router from "src/api/baseRouter.js";
 
 router.get("/entities/:entityId", (req: Request<{ entityId: string }>, res: Response) => {
 	res.send("Get entity by ID");
