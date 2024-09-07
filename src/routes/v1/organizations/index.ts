@@ -5,8 +5,8 @@
 import type { Request, Response } from "express";
 import router from "src/api/baseRouter.js";
 
-router.get("/users", (req: Request, res: Response) => {
-	res.json({ result: [] }).send();
+router.get("/organizations", (req: Request, res: Response) => {
+	return res.json({ result: [] });
 });
 
 export default router;

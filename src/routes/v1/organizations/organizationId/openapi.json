@@ -1,0 +1,52 @@
+{
+	"paths": {
+		"/organizations/{organizationId}": {
+			"get": {
+				"summary": "Get Organization",
+				"description": "Fetch the details of an organization by its unique ID.",
+				"tags": ["Organizations"],
+				"parameters": [
+					{
+						"name": "organizationId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"description": "The unique ID of the organization"
+						},
+						"description": "User ID to fetch the details for"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "User details",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"id": {
+											"type": "string",
+											"description": "The organization's unique ID"
+										},
+										"name": {
+											"type": "string",
+											"description": "The organization's name"
+										},
+										"email": {
+											"type": "string",
+											"description": "The organization's email"
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "User not found"
+					}
+				}
+			}
+		}
+	}
+}

@@ -50,6 +50,10 @@ const setupSwaggerForVersion = async (
 			version: versionPath,
 			description: `API documentation for ${versionPath}`,
 		},
+		tags: [
+			{ name: "Users", description: "Operations about users" },
+			{ name: "Organizations", description: "Operations about organizations" },
+		],
 		servers: servers.map((server) => ({ url: server })),
 	};
 
