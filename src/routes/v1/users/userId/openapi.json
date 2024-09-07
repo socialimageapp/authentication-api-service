@@ -1,0 +1,52 @@
+{
+	"paths": {
+		"/users/{userId}": {
+			"get": {
+				"summary": "Get details of a specific user",
+				"description": "Fetch the details of a user by their unique ID.",
+				"parameters": [
+					{
+						"name": "userId",
+						"in": "path",
+						"required": true,
+						"schema": {
+							"type": "string",
+							"description": "The unique ID of the user"
+						},
+						"description": "User ID to fetch the details for"
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "User details",
+						"content": {
+							"application/json": {
+								"schema": {
+									"type": "object",
+									"properties": {
+										"id": {
+											"type": "string",
+											"description": "The user's unique ID"
+										},
+										"name": {
+											"type": "string",
+											"description": "The user's name"
+										},
+										"email": {
+											"type": "string",
+											"description": "The user's email"
+										}
+									}
+								}
+							}
+						}
+					},
+					"404": {
+						"description": "User not found"
+					}
+				},
+				"tags": ["Users"]
+			}
+		}
+	}
+}

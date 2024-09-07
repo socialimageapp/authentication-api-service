@@ -36,7 +36,11 @@ const loadPartialOpenAPI = async (dirPath: string): Promise<any> => {
 };
 
 // Setup Swagger UI for specific versions
-const setupSwaggerForVersion = async (app: Router, versionPath: string) => {
+const setupSwaggerForVersion = async (
+	app: Router,
+	versionPath: string,
+	servers: string[],
+): Promise<Router> => {
 	const versionedBasePath =
 		config.basePath[versionPath as keyof typeof config.basePath];
 	const baseOpenAPI = {
@@ -46,7 +50,7 @@ const setupSwaggerForVersion = async (app: Router, versionPath: string) => {
 			version: versionPath,
 			description: `API documentation for ${versionPath}`,
 		},
-		servers: [{ url: `http://localhost:3000${versionedBasePath}` }],
+		servers: servers.map((server) => ({ url: server })),
 	};
 
 	// Load partial OpenAPI definitions from the versioned routes folder

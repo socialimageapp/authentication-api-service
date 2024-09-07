@@ -3,14 +3,11 @@
  */
 
 interface ApiConfig {
-	basePath: {
-		v1: string;
-	};
+	basePath: { v1: string };
 }
 
 const config: ApiConfig = {
-	basePath: {
-		v1: "/api/authentication/v1",
-	},
-};
+	basePath: { v1: "/api/auth/v1" },
+} as const;
+
 export default config;
