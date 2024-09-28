@@ -40,6 +40,7 @@ const loadRoutes = async (dirPath: string) => {
 			//eslint-disable-next-line no-console
 			console.log("Loading routes from", fullPath);
 			const fileUrl = pathToFileURL(fullPath).href;
+			console.log(fileUrl);
 			const { default: router } = await import(fileUrl);
 			app.use(config.basePath.v1, router);
 		}

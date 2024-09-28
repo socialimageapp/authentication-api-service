@@ -5,8 +5,8 @@
 import type { Request, Response } from "express";
 import router from "src/api/baseRouter.js";
 
-router.get("/users", (req: Request, res: Response) => {
-	return res.json({ result: [] });
+router.get("/forgot-password", (req: Request, res: Response) => {
+	res.send("Returns user details of the authenticated user");
 });
 
 export default router;
