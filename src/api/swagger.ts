@@ -21,7 +21,6 @@ const loadPartialOpenAPI = async (dirPath: string): Promise<any> => {
 
 	for (const file of files) {
 		const fullPath = path.join(dirPath, file.name);
-
 		if (file.isDirectory()) {
 			const subDoc = await loadPartialOpenAPI(fullPath);
 			openAPIDoc = deepmerge(openAPIDoc, subDoc);
@@ -31,7 +30,6 @@ const loadPartialOpenAPI = async (dirPath: string): Promise<any> => {
 			openAPIDoc = deepmerge(openAPIDoc, partialDoc);
 		}
 	}
-
 	return openAPIDoc;
 };
 
