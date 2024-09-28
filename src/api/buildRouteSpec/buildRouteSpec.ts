@@ -5,7 +5,6 @@ import type { Request, Response, Router } from "express";
 import { validateBody, validateQuery } from "./middlewares/validationMiddleware.js";
 import type {
 	OrganizationId,
-	OrganizationServiceId,
 	PermissionName,
 	UserId,
 } from "@adventurai/shared-types";
@@ -29,7 +28,7 @@ export interface MethodSpec<TBody = any, TQuery = any, TResult = any> {
 		result: ZodSchema<TResult>;
 	};
 	permission?: PermissionName | undefined;
-	handler: (7
+	handler: (
 		authentication: AuthenticationResult,
 		query: TQuery,
 		body: TBody,
