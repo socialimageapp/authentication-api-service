@@ -5,7 +5,8 @@
 		"build": "tsc",
 		"start": "node dist/index.js",
 		"dev": "nodemon src/index.ts",
-		"test:types": "tsc --noEmit",
+		"test:types": "tsc --project tsconfig.json --noEmit",
+		"test": "yarn test:types",
 		"lint": "cross-env eslint --ext .ts,.tsx ."
 	},
 	"devDependencies": {

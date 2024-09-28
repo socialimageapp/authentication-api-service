@@ -1,19 +1,25 @@
 /**
  * Copyright (c) 2020-2024, Social Image Ltd. All rights reserved.
  */
-import type { Request, Router } from "express";
+import type { Request, Response, Router } from "express";
 import { validateBody, validateQuery } from "./middlewares/validationMiddleware.js";
-import type { Organization, PermissionName, User } from "@adventurai/shared-types";
-import type { ZodSchema } from "zod";
+import type {
+	OrganizationId,
+	OrganizationServiceId,
+	PermissionName,
+	UserId,
+} from "@adventurai/shared-types";
+import type { ZodSchema, infer as ZodInfer } from "zod";
 
 export type HttpMethod = "get" | "post" | "put" | "delete" | "patch";
 export type AuthType = "public" | "jwt";
 
 export interface AuthenticationResult {
-	user?: User;
-	service?: OrganizationService;
-	organization?: Organization;
+	userId?: UserId;
+	serviceId?: OrganizationServiceId;
+	organizationId?: OrganizationId;
 }
+
 
 export interface MethodSpec<TBody = any, TQuery = any, TResult = any> {
 	auth?: AuthType;
@@ -23,7 +29,7 @@ export interface MethodSpec<TBody = any, TQuery = any, TResult = any> {
 		result: ZodSchema<TResult>;
 	};
 	permission?: PermissionName | undefined;
-	handler: (
+	handler: (7
 		authentication: AuthenticationResult,
 		query: TQuery,
 		body: TBody,
@@ -59,8 +65,8 @@ export function buildRouteSpecs(router: Router, routeSpecs: RouteSpec[]) {
 
 					const result = await methodSpec.handler(
 						authenticationResult,
-						parsedQuery,
-						body,
+						parsedQuery as ZodInfer<typeof methodSpec.schema.query>,
+						body as ZodInfer<typeof methodSpec.schema.query>,
 					);
 					return res.json(result);
 				},

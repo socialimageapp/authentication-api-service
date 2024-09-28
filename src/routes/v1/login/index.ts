@@ -2,6 +2,10 @@
  * Copyright (c) 2020-2024, Social Image Ltd. All rights reserved.
  */
 
+import {
+	LoginPostPayloadSchema,
+	LoginSuccessResultSchema,
+} from "@adventurai/shared-types";
 import router from "src/api/baseRouter.js";
 import { buildRouteSpecs } from "src/api/buildRouteSpec/buildRouteSpec.js";
 
@@ -13,10 +17,12 @@ buildRouteSpecs(router, [
 				auth: "public",
 				schema: {
 					body: LoginPostPayloadSchema,
-					result: LoginResultSchema,
+					result: LoginSuccessResultSchema,
 				},
 				handler: async ({ query }, res) => {
-					res.json({ message: "Account verified and setup successfully" });
+					return {
+						message: "Hello, world!",
+					};
 				},
 			},
 		},
