@@ -19,7 +19,7 @@ buildRouteSpecs(router, [
 					body: LoginPostPayloadSchema,
 					result: LoginSuccessResultSchema,
 				},
-				handler: async ({ query }, res) => {
+				handler: async () => {
 					return {
 						message: "Hello, world!",
 					};
