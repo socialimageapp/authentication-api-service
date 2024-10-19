@@ -6,16 +6,15 @@ import {
 	authDatabase,
 	RegisterPostPayloadSchema,
 	RegisterResultSchema,
+	User,
+	users,
 } from "@adventurai/shared-types";
-import baseRouter from "src/api/baseRouter.js";
-import {
-	buildRouteSpecs,
-	createMethodSpec,
-	createRouteSpec,
-} from "src/api/buildRouteSpec/buildRouteSpec.js";
 import crypto from "crypto";
 import bcrypt from "bcrypt";
-import { usersTable } from "lib/ast/dist/db/auth/schema.js";
+import { sendEmail, senders } from "src/utils/email";
+import { eq } from "drizzle-orm";
+import { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
+import AppError from "src/utils/errors/AppError";
 
 /**
  * Hashes a plain-text password using bcrypt.
@@ -29,57 +28,81 @@ async function hashPassword(password: string): Promise<string> {
 }
 
 /**
- * Generates a cryptographically secure verification token.
- * @returns - The verification token as a hex string.
+ * Generates a cryptographically secure verification code.
+ * @returns - The verification code as a hex string.
  */
-function generateVerificationToken(): string {
-	return crypto.randomBytes(32).toString("hex");
+function generateVerificationCode(length: number): string {
+	return crypto.randomBytes(length).toString("hex");
 }
 
-export const specification = createRouteSpec({
-	path: "/register",
-	methods: {
-		post: createMethodSpec({
-			auth: "public",
-			schema: {
-				body: RegisterPostPayloadSchema,
-				result: RegisterResultSchema,
-			},
-			handler: async ({ body }) => {
-				const { email, password, firstName, lastName } = body;
-				const existingUsers = await authDatabase.query.usersTable.findMany({
-					where: (users, { eq }) => eq(users.email, email),
-				});
-				if (existingUsers.length > 0) {
-					throw new Error("Email in use.");
+const registerRoutes: FastifyPluginAsyncZod = async function (fastify) {
+	fastify.post("/", {
+		schema: {
+			summary: "Register",
+			description: "Register a new user",
+			tags: ["Authentication", "hidden"],
+			body: RegisterPostPayloadSchema,
+			response: { 200: RegisterResultSchema },
+		},
+		handler: async (request, reply) => {
+			const { email, password, firstName, lastName } = request.body;
+
+			const existingUsers = (await authDatabase.query.users.findMany({
+				where: (users, { eq }) => eq(users.email, email),
+			})) as User[];
+			if (existingUsers.length > 0) {
+				if (existingUsers[0].verification?.verified === true) {
+					throw new AppError("User with this email already exists.", 400);
 				}
-				const hashedPassword = await hashPassword(password);
-				const newUser = await authDatabase
-					.insert(usersTable)
-					.values({
-						email,
-						password: hashedPassword,
-						firstName,
-						enrolled: "false",
-						username: email,
-						userType: "user",
-						lastName,
+				await authDatabase
+					.update(users)
+					.set({
 						verification: {
 							verified: false,
-							token: generateVerificationToken(),
-							time: new Date().toISOString(),
+							verificationCode: generateVerificationCode(6),
 						},
 					})
-					.returning();
-				return {
-					message: "Registration successful. Please verify your email.",
-					userId: newUser[0].id,
-				};
-			},
-		}),
-	},
-});
+					// @ts-expect-error - We are using the wrong type for the update set
+					.where(eq(users.email, email));
+			}
 
-buildRouteSpecs(baseRouter, [specification]);
+			const hashedPassword = await hashPassword(password);
+			const verificationCode = generateVerificationCode(6);
+			const newUser = await authDatabase
+				.insert(users)
+				.values({
+					// @ts-expect-error - We are using the wrong type for the insert values
+					email,
+					password: hashedPassword,
+					firstName,
+					lastName,
+					enrolled: "false",
+					username: email,
+					userType: "user",
+					verification: {
+						verified: false,
+						token: verificationCode,
+						time: new Date().toISOString(),
+					},
+				})
+				.returning();
 
-export default baseRouter;
+			await sendEmail({
+				dynamicTemplateData: {
+					name: `${firstName} ${lastName}`,
+					verificationCode,
+				},
+				email: newUser[0].email,
+				template: "confirmEmail",
+				sender: senders.contact,
+			});
+
+			return reply.send({
+				message: "Registration successful. Please verify your email.",
+				userId: newUser[0].id,
+			});
+		},
+	});
+};
+
+export default registerRoutes;

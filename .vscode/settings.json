@@ -1,3 +1,4 @@
 {
-	"cSpell.words": ["adventurai", "deepmerge", "Dynamoose", "openapi"]
+	"cSpell.words": ["adventurai", "deepmerge", "Dynamoose", "openapi"],
+	"eslint.workingDirectories": ["./src"]
 }

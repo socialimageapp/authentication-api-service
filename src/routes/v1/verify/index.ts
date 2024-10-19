@@ -2,69 +2,80 @@
  * Copyright (c) 2020-2024, Social Image Ltd. All rights reserved.
  */
 
-import { authDatabase, ResetPasswordResultSchema } from "@adventurai/shared-types";
-import baseRouter from "src/api/baseRouter.js";
-import {
-	buildRouteSpecs,
-	createMethodSpec,
-	createRouteSpec,
-} from "src/api/buildRouteSpec/buildRouteSpec.js";
+import { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
+import { authDatabase, ResetPasswordResultSchema } from "@adventurai/shared-types";
+import AppError from "src/utils/errors/AppError";
 
-const verifySchema = z.object({ token: z.string() });
+/**
+ * Schema for verifying the token in the query.
+ */
+const VerifySchema = z.object({
+	token: z.string(),
+});
 
-const setupUserAccount = async () => {
-	// Run any setup tasks for the user account here
+/**
+ * Fastify plugin to handle the "/verify" route.
+ */
+const verifyRoutes: FastifyPluginAsyncZod = async function (fastify) {
+	fastify.get("/", {
+		schema: {
+			summary: "Verify Account",
+			description: "Verifies the user account using the provided token",
+			tags: ["Authentication"],
+			querystring: VerifySchema,
+			response: { 200: ResetPasswordResultSchema },
+		},
+		handler: async (request, reply) => {
+			const { token } = request.query;
+
+			// Query to check if a user exists with the provided verification token
+			const users = await authDatabase.query.userVerificationRequest.findMany({
+				where: (users, { eq }) => eq(users.token, token),
+				with: {
+					user: true, // Fetch the user related to the verification request
+				},
+			});
+
+			if (users.length === 0) {
+				throw new AppError("No user found with that verification token.", 404);
+			}
+
+			const userVerificationRequest = users[0];
+
+			// Update user as verified
+			const user = userVerificationRequest.user;
+			user.verification = {
+				verified: true,
+				token: undefined,
+				time: new Date().toISOString(),
+			};
+
+			await authDatabase
+				.update(userVerificationRequest.user)
+				.set(user.verification);
+
+			// Run any account setup tasks
+			try {
+				await setupUserAccount(user);
+			} catch (error) {
+				fastify.log.error(
+					`Error setting up account for user ${user.email}:`,
+					error,
+				);
+				throw fastify.httpErrors.internalServerError("Error setting up account");
+			}
+
+			return reply.send({ message: "Account verified" });
+		},
+	});
 };
 
-// Define your RouteSpec using helper functions
-export const specification = createRouteSpec({
-	path: "/verify",
-	methods: {
-		get: createMethodSpec({
-			auth: "public",
-			schema: {
-				query: verifySchema,
-				result: ResetPasswordResultSchema,
-			},
-			handler: async ({ query }) => {
-				const { token } = query;
-				const users =
-					await authDatabase.query.userVerificationRequest.findMany({
-						where: (users, { eq }) => eq(users.token, token),
-						with: {
-							user: 
-						}
-					});
+export default verifyRoutes;
 
-				if (users.length === 0) {
-					throw new Error("No user found with that verification token.");
-				}
-				const userVerificationRequest = users[0];
-				// Update user as verified
-				user.verification = {
-					verified: true,
-					token: undefined,
-					time: new Date().toISOString(),
-				};
-				await user.save();
-
-				// Run setup function now that the account is verified
-				try {
-					// await setupUserAccount(user);
-				} catch (error) {
-					// eslint-disable-next-line no-console
-					console.error(
-						`Error setting up account for user ${user.email}:`,
-						error,
-					);
-					throw new Error("Error setting up account");
-				}
-
-				return { message: "Account verified" };
-			},
-		}),
-	},
-});
-buildRouteSpecs(baseRouter, [specification]);
-export default baseRouter;
+/**
+ * Simulated setup function, customize as needed.
+ */
+async function setupUserAccount(user: any) {
+	// Run any setup tasks for the user account here
+}
