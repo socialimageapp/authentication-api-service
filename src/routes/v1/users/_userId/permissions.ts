@@ -4,37 +4,24 @@
 
 import { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
-import type { UserId } from "@adventurai/shared-types";
+import { PermissionSchema, withResult } from "@adventurai/shared-types";
 
-/**
- * Schema for the request parameters.
- */
 const PermissionsParamsSchema = z.object({
-	userId: z.string().uuid(), // Assuming UserId is a UUID, adjust if necessary
+	userId: z.string().uuid(),
 });
 
-/**
- * Schema for the response.
- */
-const PermissionsResponseSchema = z.object({
-	message: z.string(), // Adjust based on actual response structure
-});
-
-/**
- * Fastify plugin to handle the "/permissions" route.
- */
 const permissionsRoutes: FastifyPluginAsyncZod = async function (fastify) {
 	fastify.get("/permissions", {
 		schema: {
 			params: PermissionsParamsSchema,
-			response: { 200: PermissionsResponseSchema },
+			response: { 200: withResult(z.array(PermissionSchema)) },
 		},
 		handler: async (request, reply) => {
-			const { userId } = request.params as { userId: UserId };
+			// const { userId } = request.params;
 
 			// Logic to retrieve permissions for the user with the provided userId
 			return reply.send({
-				message: `Permissions of user with ID: ${userId}`,
+				result: [{ description: "Can view user details", name: "view_user" }],
 			});
 		},
 	});

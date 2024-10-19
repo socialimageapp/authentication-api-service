@@ -4,25 +4,12 @@
 
 import { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
-import type { UserId } from "@adventurai/shared-types";
+import { UserSchema, withResult } from "@adventurai/shared-types";
 
-/**
- * Schema for the route parameters.
- */
 const UserParamsSchema = z.object({
 	userId: z.string().uuid(), // Assuming UserId is a UUID, adjust if necessary
 });
 
-/**
- * Schema for the response.
- */
-const UserResponseSchema = z.object({
-	message: z.string(), // Adjust based on actual response structure
-});
-
-/**
- * Fastify plugin to handle the "/users/:userId" route.
- */
 const userRoutes: FastifyPluginAsyncZod = async function (fastify) {
 	fastify.get("/", {
 		schema: {
@@ -30,14 +17,32 @@ const userRoutes: FastifyPluginAsyncZod = async function (fastify) {
 			description: "Returns details of the user with the provided userId",
 			tags: ["Users"],
 			params: UserParamsSchema,
-			response: { 200: UserResponseSchema },
+			response: { 200: withResult(UserSchema) },
 		},
 		handler: async (request, reply) => {
-			const { userId } = request.params as { userId: UserId };
+			const { userId } = request.params;
 
 			// Logic to retrieve details for the user with the provided userId
 			return reply.send({
-				message: `Details of user with ID: ${userId}`,
+				result: {
+					createdAt: new Date(),
+					email: "test@gmail.com",
+					id: userId,
+					enrolled: false,
+					firstName: "John",
+					lastName: "Doe",
+					lastLogin: new Date(),
+					password: "password",
+					phoneNumber: "1234567890",
+					profileImageUrl: "https://example.com/image.jpg",
+					updatedAt: new Date(),
+					username: "johndoe",
+					userType: "user",
+					verification: {
+						verificationCode: "",
+						verified: false,
+					},
+				},
 			});
 		},
 	});

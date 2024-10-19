@@ -3,30 +3,22 @@
  */
 
 import { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
+import { withResult } from "@adventurai/shared-types";
 import { z } from "zod";
 
-/**
- * Schema for the response.
- */
-const MeResponseSchema = z.object({
-	message: z.string(), // Adjust based on your actual response structure
-});
+const MeResponseSchema = z.object({ message: z.string() });
 
-/**
- * Fastify plugin to handle the "/me" route.
- */
 const meRoutes: FastifyPluginAsyncZod = async function (fastify) {
 	fastify.get("/", {
 		schema: {
 			summary: "Get User Details",
 			description: "Returns user details of the authenticated user",
 			tags: ["Users"],
-			response: { 200: MeResponseSchema },
+			response: { 200: withResult(MeResponseSchema) },
 		},
 		handler: async (request, reply) => {
-			// Logic to return the authenticated user's details
 			return reply.send({
-				message: "Returns user details of the authenticated user",
+				result: { message: "Returns user details of the authenticated user" },
 			});
 		},
 	});

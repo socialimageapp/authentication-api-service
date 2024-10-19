@@ -4,19 +4,18 @@
 
 import { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
-import { authDatabase, ResetPasswordResultSchema } from "@adventurai/shared-types";
+import {
+	authDatabase,
+	ResetPasswordResultSchema,
+	userVerificationRequests,
+} from "@adventurai/shared-types";
 import AppError from "src/utils/errors/AppError";
+import { eq } from "drizzle-orm";
 
-/**
- * Schema for verifying the token in the query.
- */
 const VerifySchema = z.object({
 	token: z.string(),
 });
 
-/**
- * Fastify plugin to handle the "/verify" route.
- */
 const verifyRoutes: FastifyPluginAsyncZod = async function (fastify) {
 	fastify.get("/", {
 		schema: {
@@ -29,12 +28,9 @@ const verifyRoutes: FastifyPluginAsyncZod = async function (fastify) {
 		handler: async (request, reply) => {
 			const { token } = request.query;
 
-			// Query to check if a user exists with the provided verification token
-			const users = await authDatabase.query.userVerificationRequest.findMany({
+			const users = await authDatabase.query.userVerificationRequests.findMany({
 				where: (users, { eq }) => eq(users.token, token),
-				with: {
-					user: true, // Fetch the user related to the verification request
-				},
+				with: { user: true },
 			});
 
 			if (users.length === 0) {
@@ -43,19 +39,17 @@ const verifyRoutes: FastifyPluginAsyncZod = async function (fastify) {
 
 			const userVerificationRequest = users[0];
 
-			// Update user as verified
 			const user = userVerificationRequest.user;
 			user.verification = {
 				verified: true,
-				token: undefined,
-				time: new Date().toISOString(),
+				verificationCode: "",
 			};
 
 			await authDatabase
-				.update(userVerificationRequest.user)
-				.set(user.verification);
+				.delete(userVerificationRequests)
+				// @ts-expect-error - ORM types are not correct
+				.where(eq(userVerificationRequests.id, userVerificationRequest.id));
 
-			// Run any account setup tasks
 			try {
 				await setupUserAccount(user);
 			} catch (error) {
@@ -63,7 +57,7 @@ const verifyRoutes: FastifyPluginAsyncZod = async function (fastify) {
 					`Error setting up account for user ${user.email}:`,
 					error,
 				);
-				throw fastify.httpErrors.internalServerError("Error setting up account");
+				throw new AppError("Error setting up account", 500);
 			}
 
 			return reply.send({ message: "Account verified" });

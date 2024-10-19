@@ -5,12 +5,10 @@
 import {
 	LoginPostPayloadSchema,
 	LoginSuccessResultSchema,
+	withResult,
 } from "@adventurai/shared-types";
 import { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 
-/**
- * Fastify plugin to handle login route.
- */
 const loginRoutes: FastifyPluginAsyncZod = async function (fastify) {
 	fastify.post("/", {
 		schema: {
@@ -18,10 +16,12 @@ const loginRoutes: FastifyPluginAsyncZod = async function (fastify) {
 			description: "Login to the application using the provided credentials",
 			tags: ["Authentication"],
 			body: LoginPostPayloadSchema,
-			response: { 200: LoginSuccessResultSchema },
+			response: { 200: withResult(LoginSuccessResultSchema) },
 		},
 		handler: async (request, reply) => {
-			return reply.send({ token: "Hello, world!", message: "Login successful" });
+			return reply.send({
+				result: { token: "Hello, world!", message: "Login successful" },
+			});
 		},
 	});
 };

@@ -8,6 +8,7 @@ import {
 	RegisterResultSchema,
 	User,
 	users,
+	withResult,
 } from "@adventurai/shared-types";
 import crypto from "crypto";
 import bcrypt from "bcrypt";
@@ -42,7 +43,7 @@ const registerRoutes: FastifyPluginAsyncZod = async function (fastify) {
 			description: "Register a new user",
 			tags: ["Authentication", "hidden"],
 			body: RegisterPostPayloadSchema,
-			response: { 200: RegisterResultSchema },
+			response: { 200: withResult(RegisterResultSchema) },
 		},
 		handler: async (request, reply) => {
 			const { email, password, firstName, lastName } = request.body;
@@ -98,8 +99,10 @@ const registerRoutes: FastifyPluginAsyncZod = async function (fastify) {
 			});
 
 			return reply.send({
-				message: "Registration successful. Please verify your email.",
-				userId: newUser[0].id,
+				result: {
+					message: "Registration successful. Please verify your email.",
+					userId: newUser[0].id,
+				},
 			});
 		},
 	});

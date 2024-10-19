@@ -3,31 +3,19 @@
  */
 
 import { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
+import { builtInRoles, RoleSchema, withResult } from "lib/ast/dist";
 import { z } from "zod";
 
-/**
- * Schema for the response.
- */
-const RolesResponseSchema = z.object({
-	message: z.string(), // Adjust based on actual response structure
-});
-
-/**
- * Fastify plugin to handle the "/roles" route.
- */
 const rolesRoutes: FastifyPluginAsyncZod = async function (fastify) {
 	fastify.get("/", {
 		schema: {
 			summary: "Roles",
-			description: "Returns built-in applicationroles",
+			description: "Returns built-in application roles",
 			tags: ["Roles"],
-			response: { 200: RolesResponseSchema },
+			response: { 200: withResult(z.array(RoleSchema)) },
 		},
 		handler: async (request, reply) => {
-			// Logic to retrieve roles for the current authenticated user
-			return reply.send({
-				message: "List of Roles for the current authenticated user",
-			});
+			return reply.send({ result: [...builtInRoles] });
 		},
 	});
 };

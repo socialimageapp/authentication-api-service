@@ -1,4 +1,14 @@
 {
-	"cSpell.words": ["adventurai", "deepmerge", "Dynamoose", "openapi"],
+	"cSpell.words": [
+		"adventurai",
+		"autoload",
+		"deepmerge",
+		"depcruise",
+		"Dynamoose",
+		"Fastify",
+		"knip",
+		"openapi",
+		"sendgrid"
+	],
 	"eslint.workingDirectories": ["./src"]
 }

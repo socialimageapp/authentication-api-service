@@ -2,12 +2,13 @@
  * Copyright (c) 2020-2024, Social Image Ltd. All rights reserved.
  */
 import Fastify from "fastify";
-import path, { join } from "path";
+import path, { join, resolve } from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import fastifySwagger from "@fastify/swagger";
 import fastifyFavicon from "fastify-favicon";
 import fastifySwaggerUI from "@fastify/swagger-ui";
+import fastifyStatic from "@fastify/static";
 import {
 	jsonSchemaTransform,
 	serializerCompiler,
@@ -18,9 +19,9 @@ import {
 } from "fastify-type-provider-zod";
 import autoLoad from "@fastify/autoload";
 import helmet from "@fastify/helmet";
-import { NotFoundError, OrganizationSchema, UserSchema } from "lib/ast/dist";
+import { NotFoundError, OrganizationSchema, UserSchema } from "@adventurai/shared-types";
 import config from "./configs/api";
-
+import { readFile } from "fs/promises";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -31,18 +32,22 @@ dotenv.config({
 	),
 });
 
+const DOCS_PATH = config.docsPath ?? "/documentation";
+
 const PORT = process.env.PORT || "3000";
 
 const fastify = Fastify({ logger: true });
 fastify.setValidatorCompiler(validatorCompiler);
 fastify.setSerializerCompiler(serializerCompiler);
-await fastify.register(
-	helmet,
-	// Example disables the `contentSecurityPolicy` middleware but keeps the rest.
-	{ contentSecurityPolicy: false },
-);
-const faviconPath = path.join(__dirname, "../public");
-await fastify.register(fastifyFavicon, { path: faviconPath });
+await fastify.register(helmet);
+// Favicon
+await fastify.register(fastifyStatic, {
+	root: path.join(__dirname, "public"),
+	prefix: "/public/",
+});
+await fastify.register(fastifyFavicon, {
+	path: path.join(__dirname, "../"),
+});
 await fastify.register(import("@fastify/rate-limit"), {
 	max: 100,
 	timeWindow: "1 minute",
@@ -82,9 +87,28 @@ await fastify.register(fastifySwagger, {
 		externalDocs: { url: "https://swagger.io", description: "Find more info here" },
 	},
 });
-
+const logo: Buffer = await readFile(resolve(__dirname, "../public/logo.png"));
+const favicon: Buffer = await readFile(resolve(__dirname, "../public/favicon.ico"));
 await fastify.register(fastifySwaggerUI, {
-	routePrefix: config.docsPath ?? "/documentation",
+	routePrefix: DOCS_PATH,
+	logo: {
+		type: "image/png",
+		content: logo,
+		href: DOCS_PATH,
+		target: "_blank",
+	},
+	theme: {
+		title: `${config.appName ?? "YOUR AI WRAPPER"} Authentication API`,
+		favicon: [
+			{
+				filename: "favicon.png",
+				rel: "icon",
+				sizes: "16x16",
+				type: "image/png",
+				content: favicon,
+			},
+		],
+	},
 });
 
 fastify.setNotFoundHandler((req) => {
@@ -148,9 +172,7 @@ fastify.listen({ port: Number(PORT), host: "0.0.0.0" }, (err, address) => {
 	console.log(`Server is running on ${address}`);
 });
 // eslint-disable-next-line no-console
-console.log(
-	`Documentation running at http://localhost:${PORT}${config.docsPath ?? "/documentation"}`,
-);
+console.log(`Documentation running at http://localhost:${PORT}${DOCS_PATH}`);
 
 // Handle graceful shutdown
 process.on("exit", function () {

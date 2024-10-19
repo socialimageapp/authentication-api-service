@@ -7,10 +7,9 @@ import { z } from "zod";
 import {
 	OrganizationIdSchema,
 	OrganizationSchema,
+	withResult,
 	type OrganizationId,
 } from "@adventurai/shared-types";
-
-const withResult = <T>(schema: z.ZodType<T>) => z.object({ result: schema });
 
 const ParamsSchema = z.object({ organizationId: OrganizationIdSchema });
 

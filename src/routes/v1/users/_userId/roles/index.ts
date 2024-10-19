@@ -4,25 +4,12 @@
 
 import { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
-import type { UserId } from "@adventurai/shared-types";
+import { RoleSchema, withResult } from "@adventurai/shared-types";
 
-/**
- * Schema for the route parameters.
- */
 const UserRolesParamsSchema = z.object({
-	userId: z.string().uuid(), // Assuming UserId is a UUID, adjust if necessary
+	userId: z.string().uuid(),
 });
 
-/**
- * Schema for the response.
- */
-const UserRolesResponseSchema = z.object({
-	message: z.string(), // Adjust based on actual response structure
-});
-
-/**
- * Fastify plugin to handle the "/users/:userId/roles" route.
- */
 const userRolesRoutes: FastifyPluginAsyncZod = async function (fastify) {
 	fastify.get("/", {
 		schema: {
@@ -31,15 +18,12 @@ const userRolesRoutes: FastifyPluginAsyncZod = async function (fastify) {
 				"Returns roles for the current authenticated user (Not organization roles)",
 			tags: ["Roles"],
 			params: UserRolesParamsSchema,
-			response: { 200: UserRolesResponseSchema },
+			response: { 200: withResult(z.array(RoleSchema)) },
 		},
 		handler: async (request, reply) => {
-			const { userId } = request.params as { userId: UserId };
-
+			// const { userId } = request.params;
 			// Logic to retrieve roles for the user with the provided userId
-			return reply.send({
-				message: `Roles of user with ID: ${userId}`,
-			});
+			return reply.send({ result: [] });
 		},
 	});
 };

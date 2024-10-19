@@ -3,25 +3,16 @@
  */
 
 import { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
+import { OrganizationSchema, withResult } from "@adventurai/shared-types";
 import { z } from "zod";
 
-/**
- * Schema for the response.
- */
-const OrganizationsResponseSchema = z.object({
-	result: z.array(z.unknown()), // Adjust based on the actual structure of the result
-});
-
-/**
- * Fastify plugin to handle the "/organizations" route.
- */
 const organizationsRoutes: FastifyPluginAsyncZod = async function (fastify) {
 	fastify.get("/", {
 		schema: {
 			summary: "Organizations",
 			description: "Returns a list of organizations for the authenticated user",
 			tags: ["Organizations"],
-			response: { 200: OrganizationsResponseSchema },
+			response: { 200: withResult(z.array(OrganizationSchema)) },
 		},
 		handler: async (request, reply) => {
 			// Logic to retrieve organizations (currently just an empty array)

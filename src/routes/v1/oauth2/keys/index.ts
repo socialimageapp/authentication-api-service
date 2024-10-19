@@ -5,16 +5,10 @@
 import { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
 
-/**
- * Schema for the response.
- */
 const OAuth2KeysResponseSchema = z.object({
-	message: z.string(), // Adjust based on your actual response structure
+	message: z.string(),
 });
 
-/**
- * Fastify plugin to handle the "/oauth2/keys" route.
- */
 const oauth2KeysRoutes: FastifyPluginAsyncZod = async function (fastify) {
 	fastify.get("/", {
 		schema: {
@@ -24,7 +18,6 @@ const oauth2KeysRoutes: FastifyPluginAsyncZod = async function (fastify) {
 			response: { 200: OAuth2KeysResponseSchema },
 		},
 		handler: async (request, reply) => {
-			// Logic for token exchange or returning OAuth2 keys
 			return reply.send({
 				message: "Token exchange",
 			});
