@@ -42,7 +42,7 @@ fastify.setSerializerCompiler(serializerCompiler);
 await fastify.register(helmet);
 // Favicon
 await fastify.register(fastifyStatic, {
-	root: path.join(__dirname, "public"),
+	root: path.join(__dirname, "../public"),
 	prefix: "/public/",
 });
 await fastify.register(fastifyFavicon, {

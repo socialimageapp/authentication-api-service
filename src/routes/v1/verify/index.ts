@@ -5,22 +5,44 @@
 import { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
 import {
-	authDatabase,
+	organizations,
+	organizationUsers,
 	ResetPasswordResultSchema,
+	User,
+	UserIdSchema,
+	users,
 	userVerificationRequests,
 } from "@adventurai/shared-types";
 import AppError from "src/utils/errors/AppError";
 import { eq } from "drizzle-orm";
+import { authDatabase } from "src/configs/db";
+import { FastifyInstance } from "fastify";
 
-const VerifySchema = z.object({
-	token: z.string(),
-});
+const VerifySchema = z.object({ token: z.string(), userId: UserIdSchema });
+
+async function setupUserAccount(user: User, fastify: FastifyInstance) {
+	const org = await authDatabase
+		.insert(organizations)
+		.values({
+			ownerId: user.id,
+			name: "My First Organization",
+			slug: crypto.randomUUID(),
+			description: "My First Organization",
+		})
+		.returning();
+	fastify.log.info(`Created organization ${org[0].name} for user ${user.email}`);
+	await authDatabase.insert(organizationUsers).values({
+		organizationId: org[0].id,
+		userId: user.id,
+		roles: ["owner"],
+	});
+}
 
 const verifyRoutes: FastifyPluginAsyncZod = async function (fastify) {
 	fastify.get("/", {
 		schema: {
 			summary: "Verify Account",
-			description: "Verifies the user account using the provided token",
+			description: "Verifies the user account using the provided code",
 			tags: ["Authentication"],
 			querystring: VerifySchema,
 			response: { 200: ResetPasswordResultSchema },
@@ -28,35 +50,32 @@ const verifyRoutes: FastifyPluginAsyncZod = async function (fastify) {
 		handler: async (request, reply) => {
 			const { token } = request.query;
 
-			const users = await authDatabase.query.userVerificationRequests.findMany({
-				where: (users, { eq }) => eq(users.token, token),
-				with: { user: true },
-			});
-
-			if (users.length === 0) {
+			const foundUserVerificationRequests =
+				await authDatabase.query.userVerificationRequests.findMany({
+					where: (requests, { eq, and }) =>
+						and(eq(requests.token, token), eq(requests.type, "email")),
+					with: { user: true },
+				});
+			if (foundUserVerificationRequests.length === 0) {
 				throw new AppError("No user found with that verification token.", 404);
 			}
 
-			const userVerificationRequest = users[0];
+			const userVerificationRequest = foundUserVerificationRequests[0];
 
 			const user = userVerificationRequest.user;
-			user.verification = {
-				verified: true,
-				verificationCode: "",
-			};
 
 			await authDatabase
+				.update(users)
+				.set({ verified: true })
+				.where(eq(users.id, user.id));
+			await authDatabase
 				.delete(userVerificationRequests)
-				// @ts-expect-error - ORM types are not correct
 				.where(eq(userVerificationRequests.id, userVerificationRequest.id));
 
 			try {
-				await setupUserAccount(user);
+				await setupUserAccount(user as User, fastify);
 			} catch (error) {
-				fastify.log.error(
-					`Error setting up account for user ${user.email}:`,
-					error,
-				);
+				fastify.log.error(error);
 				throw new AppError("Error setting up account", 500);
 			}
 
@@ -66,10 +85,3 @@ const verifyRoutes: FastifyPluginAsyncZod = async function (fastify) {
 };
 
 export default verifyRoutes;
-
-/**
- * Simulated setup function, customize as needed.
- */
-async function setupUserAccount(user: any) {
-	// Run any setup tasks for the user account here
-}
