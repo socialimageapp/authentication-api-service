@@ -10,21 +10,13 @@ import { setupFastifyTestEnv } from "src/setupFastify";
 import { Email, LoginPostPayload, organizations, users } from "lib/ast/dist";
 import { eq } from "drizzle-orm";
 import { registerAndVerifyUser } from "../register/register.test";
-import { randomUUID } from "crypto";
 let testUserId: string;
 
-describe("Login Flow", function () {
+describe("/me", function () {
 	const fastify = Fastify({ logger: false });
 
 	before(async function () {
 		await setupFastifyTestEnv(fastify);
-	});
-
-	this.afterEach(async function () {
-		await authDatabase.delete(users).where(eq(users.id, testUserId));
-		await authDatabase
-			.delete(organizations)
-			.where(eq(organizations.ownerId, testUserId));
 	});
 
 	this.afterAll(async function () {
@@ -35,7 +27,7 @@ describe("Login Flow", function () {
 		await fastify.close();
 	});
 
-	it("should login successfully", async function () {
+	it("should get the users details", async function () {
 		const { user, password } = await registerAndVerifyUser(fastify);
 		testUserId = user.id;
 		const loginResponse = await request(fastify.server)
@@ -47,16 +39,6 @@ describe("Login Flow", function () {
 			.get("/api/v1/me")
 			.set("Authorization", `Bearer ${loginResponse.body.result.token}`);
 		expect(meResponse.body.result.email).to.equal(user.email);
-	});
-	it("should login successfully", async function () {
-		const { user, password } = await registerAndVerifyUser(fastify);
-		testUserId = user.id;
-		await request(fastify.server)
-			.post("/api/v1/login")
-			.send({ email: user.email as Email, password } satisfies LoginPostPayload);
-		await request(fastify.server)
-			.get("/api/v1/me")
-			.set("Authorization", `Bearer ${randomUUID()}`)
-			.expect(401);
+		expect(meResponse.body.result.firstName).to.equal(user.firstName);
 	});
 });

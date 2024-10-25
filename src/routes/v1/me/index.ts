@@ -1,25 +1,36 @@
-/**
- * Copyright (c) 2020-2024, Social Image Ltd. All rights reserved.
- */
-
 import { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import { withResult } from "@adventurai/shared-types";
-import { z } from "zod";
+import { withResult, UserSchema, User } from "@adventurai/shared-types";
+import { authDatabase } from "src/configs/db";
+import AppError from "src/utils/errors/AppError";
 
-const MeResponseSchema = z.object({ message: z.string() });
+const MeResponseSchema = withResult(UserSchema.omit({ password: true }));
 
 const meRoutes: FastifyPluginAsyncZod = async function (fastify) {
 	fastify.get("/", {
+		// @ts-expect-error - preHandler is not defined in the Fastify type
+		preHandler: [fastify.authenticate],
 		schema: {
 			summary: "Get User Details",
 			description: "Returns user details of the authenticated user",
 			tags: ["Users"],
-			response: { 200: withResult(MeResponseSchema) },
+			response: { 200: MeResponseSchema },
 		},
 		handler: async (request, reply) => {
-			return reply.send({
-				result: { message: "Returns user details of the authenticated user" },
+			// @ts-expect-error - sub is not defined in the Fastify type
+			const userId = request.user.sub!;
+
+			const user = await authDatabase.query.users.findFirst({
+				where: (usersTable, { eq }) => eq(usersTable.id, userId),
 			});
+
+			if (!user) {
+				throw new AppError("User not found", 404);
+			}
+
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			const { password, ...userWithoutPassword } = user;
+
+			return reply.send({ result: userWithoutPassword as User });
 		},
 	});
 };

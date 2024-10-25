@@ -14,11 +14,12 @@ import {
 } from "@adventurai/shared-types";
 import crypto from "crypto";
 import bcrypt from "bcrypt";
-import { sendEmail, senders } from "src/utils/email";
+import { senders } from "src/utils/email";
 import { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import AppError from "src/utils/errors/AppError";
 import { authDatabase } from "src/configs/db";
 import { FastifyInstance } from "fastify";
+import { emailQueue } from "src/queues";
 
 /**
  * Hashes a plain-text password using bcrypt.
@@ -31,6 +32,21 @@ async function hashPassword(password: string): Promise<string> {
 	return await bcrypt.hash(password, salt);
 }
 
+/**
+ * Generates a cryptographically secure verification code.
+ * @returns - The verification code as a hex string.
+ */
+export function generateVerificationCode(length: number): string {
+	return crypto.randomBytes(length).toString("hex");
+}
+/**
+ * Generates a cryptographically secure verification code.
+ * @returns - The verification code as a hex string.
+ */
+function generateVerificationCodeNumber(): number {
+	return crypto.randomInt(0, 1000000);
+}
+
 const sendNewAuthenticationRequest = async (
 	userId: UserId,
 	fastify: FastifyInstance,
@@ -41,7 +57,7 @@ const sendNewAuthenticationRequest = async (
 		.values({
 			userId,
 			expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
-			token: generateVerificationCode(32),
+			token: generateVerificationCodeNumber().toString(),
 			type: "email",
 			createdAt: new Date(),
 		})
@@ -54,7 +70,7 @@ const sendNewAuthenticationRequest = async (
 		fastify.log.info("Found user:", user);
 		throw new AppError("User not found", 404);
 	}
-	const sent = await sendEmail({
+	const sent = await emailQueue.add("sendEmail", {
 		dynamicTemplateData: {
 			name: `${user.firstName} ${user.lastName}`,
 			verificationCode: verificationRequest[0].token,
@@ -66,13 +82,6 @@ const sendNewAuthenticationRequest = async (
 	fastify.log.warn(`Email sent: ${sent}`);
 	return verificationRequest[0] as UserVerificationRequest;
 };
-/**
- * Generates a cryptographically secure verification code.
- * @returns - The verification code as a hex string.
- */
-function generateVerificationCode(length: number): string {
-	return crypto.randomBytes(length).toString("hex");
-}
 
 const registerRoutes: FastifyPluginAsyncZod = async function (fastify) {
 	fastify.post("/", {
@@ -89,11 +98,13 @@ const registerRoutes: FastifyPluginAsyncZod = async function (fastify) {
 			const existingUsers = (await authDatabase.query.users.findMany({
 				where: (users, { eq }) => eq(users.email, email),
 			})) as User[];
+
 			if (existingUsers.length > 0) {
 				if (existingUsers[0].verified === true) {
 					throw new AppError("User with this email already exists.", 400);
 				}
 				await sendNewAuthenticationRequest(existingUsers[0].id, fastify);
+
 				return reply.send({
 					result: {
 						message: "User already exists. Please verify your email.",

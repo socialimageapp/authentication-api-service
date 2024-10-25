@@ -3,12 +3,20 @@
  */
 import { describe } from "mocha";
 import { expect } from "chai";
-import { FastifyInstance } from "fastify";
+import Fastify, { FastifyInstance } from "fastify";
 import request from "supertest";
 import { authDatabase } from "src/configs/db";
 import { v4 as uuidv4 } from "uuid";
-import { setupFastify } from "src/tests/setupFastify";
-import { organizations, users } from "lib/ast/dist";
+import { setupFastifyTestEnv } from "src/setupFastify";
+import {
+	Email,
+	organizations,
+	Password,
+	RegisterPostPayload,
+	User,
+	users,
+	UserVerificationRequest,
+} from "@adventurai/shared-types";
 import { eq } from "drizzle-orm";
 // import { exec } from "child_process";
 // import util from "util";
@@ -20,41 +28,84 @@ export const registerUser = async (
 	fastify: FastifyInstance,
 ): Promise<{
 	response: request.Response;
-	registerPayload: {
-		email: string;
-		password: string;
-		confirmPassword: string;
-		firstName: string;
-		lastName: string;
-	};
+	verificationRequest: UserVerificationRequest;
+	registerPayload: RegisterPostPayload;
 }> => {
-	const email = `${uuidv4()}@example.com`;
+	const email = `${uuidv4()}-awesomeapp@example.com`;
 	const password = "ThisIsAPassword123!";
-	const firstName = "John";
-	const lastName = "Doe";
+	const firstName = "Elon";
+	const lastName = "Musk";
 
-	const registerPayload = {
-		email,
-		password,
-		confirmPassword: password,
+	const registerPayload: RegisterPostPayload = {
+		email: email as Email,
+		password: password as Password,
+		confirmPassword: password as Password,
 		firstName,
 		lastName,
 	};
 
 	const registerResponse = await request(fastify.server)
-		.post("/api/v1/register") // Adjust the path to include the prefix
-		.send(registerPayload);
-	return {
+		.post("/api/v1/register")
+		.send(registerPayload)
+		.expect(200);
+
+	const userId = registerResponse.body.result.userId;
+
+	const verificationRequest =
+		(await authDatabase.query.userVerificationRequests.findFirst({
+			where: (userVerificationRequests, { eq }) =>
+				eq(userVerificationRequests.userId, userId),
+		})) as UserVerificationRequest | undefined;
+	if (!verificationRequest) {
+		throw new Error("No verification request found for the user");
+	}
+	expect(verificationRequest.token).to.not.be.eq(undefined);
+
+	const user = await authDatabase.query.users.findFirst({
+		where: (users, { eq }) => eq(users.email, email),
+	});
+	expect(user).to.not.be.eq(undefined);
+	expect(user?.verified).to.be.eq(false);
+	return { response: registerResponse, registerPayload, verificationRequest };
+};
+
+export const verifyUser = async (
+	fastify: FastifyInstance,
+	token: string,
+	userId: string,
+): Promise<request.Response> => {
+	return request(fastify.server)
+		.get("/api/v1/verify")
+		.query({ token, userId })
+		.expect(200);
+};
+
+export const registerAndVerifyUser = async (
+	fastify: FastifyInstance,
+): Promise<{ user: User; password: Password }> => {
+	const {
 		response: registerResponse,
+		verificationRequest,
 		registerPayload,
-	};
+	} = await registerUser(fastify);
+	const userId = registerResponse.body.result.userId;
+	const verificationToken = verificationRequest.token;
+	await verifyUser(fastify, verificationToken, userId);
+	const user = (await authDatabase.query.users.findFirst({
+		where: (users, { eq }) => eq(users.id, userId),
+	})) as User | undefined;
+	if (!user) {
+		throw new Error("User not found");
+	}
+	const password = registerPayload.password;
+	return { user, password };
 };
 
 describe("Registration and Verification Flow", function () {
-	let fastify: FastifyInstance;
+	const fastify = Fastify({ logger: false });
 
 	before(async function () {
-		fastify = await setupFastify();
+		await setupFastifyTestEnv(fastify);
 	});
 
 	this.afterAll(async function () {
@@ -62,56 +113,34 @@ describe("Registration and Verification Flow", function () {
 		await authDatabase
 			.delete(organizations)
 			.where(eq(organizations.ownerId, testUserId));
-		await authDatabase.$client.end();
 		await fastify.close();
 	});
 
 	it("should register a new user and create a verification request", async function () {
-		const { registerPayload, response: registerResponse } =
+		const { response: registerResponse, verificationRequest } =
 			await registerUser(fastify);
 		expect(registerResponse.body.result.message).to.equal(
 			"Registration successful. Please verify your email.",
 		);
-		const { email } = registerPayload;
 		const userId = registerResponse.body.result.userId;
-		// Verify that the user exists in the database
-		const user = await authDatabase.query.users.findFirst({
-			where: (users, { eq }) => eq(users.email, email),
-		});
-		expect(user).to.not.be.eq(undefined);
-		expect(user?.verified).to.be.eq(false);
-
-		// Check the user verification request exists
-		const verificationRequest =
-			await authDatabase.query.userVerificationRequests.findFirst({
-				where: (userVerificationRequests, { eq }) =>
-					eq(userVerificationRequests.userId, userId),
-			});
-		if (!verificationRequest) {
-			throw new Error("No verification request found for the user");
-		}
-		expect(verificationRequest.token).to.not.be.eq(undefined);
-
 		testUserId = userId;
 		testVerificationToken = verificationRequest.token;
 	});
 
 	it("should verify the user using the verification token", async function () {
-		const verifyResponse = await request(fastify.server)
-			.get("/api/v1/verify") // Adjust the path to include the prefix
-			.query({ token: testVerificationToken, userId: testUserId })
-			.expect(200);
+		const verifyResponse = await verifyUser(
+			fastify,
+			testVerificationToken,
+			testUserId,
+		);
+		expect(verifyResponse.body.result.message).to.equal("Account verified");
 
-		expect(verifyResponse.body.message).to.equal("Account verified");
-
-		// Verify the user is now marked as verified in the database
 		const verifiedUser = await authDatabase.query.users.findFirst({
 			where: (users, { eq }) => eq(users.id, testUserId),
 		});
 		expect(verifiedUser).to.not.be.eq(undefined);
 		expect(verifiedUser?.verified).to.be.eq(true);
 
-		// Check that the verification request has been deleted
 		const deletedVerificationRequest =
 			await authDatabase.query.userVerificationRequests.findFirst({
 				where: (userVerificationRequests, { eq }) =>

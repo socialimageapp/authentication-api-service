@@ -34,34 +34,53 @@ export const emailTemplates = {
 		id: "d-29c40aa6582d40df85535c6b59278f14",
 		schema: z.object({ verificationCode: z.string(), name: z.string() }),
 	},
+	resetPassword: {
+		id: "d-29c40aa6582d40df85535c6b59278f14",
+		schema: z.object({ resetLink: z.string(), name: z.string() }),
+	},
 };
 
 // Extract dynamic template schema types
-type TemplateKeys = keyof typeof emailTemplates;
+export type TemplateKeys = keyof typeof emailTemplates;
 type TemplateData<T extends TemplateKeys> = z.infer<(typeof emailTemplates)[T]["schema"]>;
 
-export const senders: Record<string, MailDataRequired["from"]> = {
+export const senders = {
 	contact: { email: "contact@adventur.ai", name: "AdVentur.ai" },
-};
+} as const satisfies Record<string, MailDataRequired["from"]>;
 
-export const sendEmail = async <T extends TemplateKeys>(args: {
+export interface EmailArgs<T> {
 	email: string;
 	sender: MailDataRequired["from"];
 	template: T;
 	dynamicTemplateData: TemplateData<T>;
-}) => {
+}
+
+export interface EmailArg<T extends TemplateKeys> {
+	email: string;
+	sender: MailDataRequired["from"];
+	template: keyof typeof emailTemplates;
+	dynamicTemplateData: TemplateData<T>;
+}
+
+export const sendEmail = async <T extends TemplateKeys>(args: EmailArgs<T>) => {
+	if (process.env.MODE === "development") {
+		console.log("Email not sent in development mode");
+		return;
+	}
 	const { email, sender, template, dynamicTemplateData } = args;
-
 	emailTemplates[template].schema.parse(dynamicTemplateData);
-
 	sendgridEmailClient.setApiKey(process.env.SENDGRID_API_KEY!);
-
-	const res = await sendgridEmailClient.send({
-		to: email,
-		from: sender,
-		templateId: emailTemplates[template].id,
-		dynamicTemplateData,
-	});
-
+	const res = await sendgridEmailClient
+		.send({
+			to: email,
+			from: sender,
+			templateId: emailTemplates[template].id,
+			dynamicTemplateData,
+		})
+		.catch((error) => {
+			console.dir(error.response, { colors: true, depth: Infinity });
+			console.error("Error sending email:", error);
+		});
+	console.dir(res, { colors: true, depth: Infinity });
 	return res;
 };

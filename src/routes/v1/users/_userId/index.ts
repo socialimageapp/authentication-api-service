@@ -4,11 +4,11 @@
 
 import { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
-import { UserSchema, withResult } from "@adventurai/shared-types";
+import { User, UserIdSchema, UserSchema, withResult } from "@adventurai/shared-types";
+import { authDatabase } from "src/configs/db";
+import AppError from "src/utils/errors/AppError";
 
-const UserParamsSchema = z.object({
-	userId: z.string().uuid(), // Assuming UserId is a UUID, adjust if necessary
-});
+const UserParamsSchema = z.object({ userId: UserIdSchema });
 
 const userRoutes: FastifyPluginAsyncZod = async function (fastify) {
 	fastify.get("/", {
@@ -17,33 +17,19 @@ const userRoutes: FastifyPluginAsyncZod = async function (fastify) {
 			description: "Returns details of the user with the provided userId",
 			tags: ["Users"],
 			params: UserParamsSchema,
-			response: { 200: withResult(UserSchema) },
+			response: { 200: withResult(UserSchema.omit({ password: true })) },
 		},
 		handler: async (request, reply) => {
 			const { userId } = request.params;
-
-			// Logic to retrieve details for the user with the provided userId
-			return reply.send({
-				result: {
-					createdAt: new Date(),
-					email: "test@gmail.com",
-					id: userId,
-					enrolled: false,
-					firstName: "John",
-					lastName: "Doe",
-					lastLogin: new Date(),
-					password: "password",
-					phoneNumber: "1234567890",
-					profileImageUrl: "https://example.com/image.jpg",
-					updatedAt: new Date(),
-					username: "johndoe",
-					userType: "user",
-					verification: {
-						verificationCode: "",
-						verified: false,
-					},
-				},
-			});
+			const user = (await authDatabase.query.users
+				.findFirst({ where: (users, { eq }) => eq(users.id, userId) })
+				.execute()) as User | null;
+			if (!user) {
+				throw new AppError("User not found", 404);
+			}
+			// eslint-disable-next-line @typescript-eslint/no-unused-vars
+			const { password, ...result } = user;
+			reply.send({ result });
 		},
 	});
 };
