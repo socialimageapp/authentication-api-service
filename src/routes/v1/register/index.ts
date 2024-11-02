@@ -21,6 +21,16 @@ import { authDatabase } from "src/configs/db";
 import { FastifyInstance } from "fastify";
 import { emailQueue } from "src/queues";
 
+const AUTH_MESSAGES = {
+	LOGIN_FAILED: "Invalid email or password",
+	ACCOUNT_CREATED:
+		"If the email is not already registered, a confirmation email will be sent",
+	PASSWORD_RESET:
+		"If an account exists with this email, password reset instructions will be sent",
+	EMAIL_CONFIRMATION: "If the email exists, a confirmation email has been sent",
+	ACCOUNT_LOCKED: "Too many failed attempts. Please try again later.",
+} as const;
+
 /**
  * Hashes a plain-text password using bcrypt.
  * @param password - The plain-text password to hash.
@@ -51,7 +61,6 @@ const sendNewAuthenticationRequest = async (
 	userId: UserId,
 	fastify: FastifyInstance,
 ): Promise<UserVerificationRequest> => {
-	// Create a new verification request
 	const verificationRequest = await authDatabase
 		.insert(userVerificationRequests)
 		.values({
@@ -68,7 +77,7 @@ const sendNewAuthenticationRequest = async (
 	});
 	if (!user) {
 		fastify.log.info("Found user:", user);
-		throw new AppError("User not found", 404);
+		throw new AppError(AUTH_MESSAGES.ACCOUNT_CREATED, 404, "UserNotFound");
 	}
 	const sent = await emailQueue.add("sendEmail", {
 		dynamicTemplateData: {
@@ -77,6 +86,7 @@ const sendNewAuthenticationRequest = async (
 		},
 		email: user.email,
 		template: "confirmEmail",
+		subject: "Confirm your email",
 		sender: senders.contact,
 	});
 	fastify.log.warn(`Email sent: ${sent}`);
@@ -101,7 +111,11 @@ const registerRoutes: FastifyPluginAsyncZod = async function (fastify) {
 
 			if (existingUsers.length > 0) {
 				if (existingUsers[0].verified === true) {
-					throw new AppError("User with this email already exists.", 400);
+					throw new AppError(
+						"User with this email already exists.",
+						400,
+						"UserExistsLoginRequired",
+					);
 				}
 				await sendNewAuthenticationRequest(existingUsers[0].id, fastify);
 

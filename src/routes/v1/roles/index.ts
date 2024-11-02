@@ -3,7 +3,7 @@
  */
 
 import { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import { builtInRoles, RoleSchema, withResult } from "lib/ast/dist";
+import { builtInRoles, RoleSchema, withResult } from "@adventurai/shared-types";
 import { z } from "zod";
 
 const rolesRoutes: FastifyPluginAsyncZod = async function (fastify) {

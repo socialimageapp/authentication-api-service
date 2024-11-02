@@ -11,6 +11,7 @@
 		"esModuleInterop": true,
 		"baseUrl": ".",
 		"skipLibCheck": true,
+		"jsx": "react-jsx",
 		"declarationMap": true,
 		"alwaysStrict": true,
 		"paths": {},

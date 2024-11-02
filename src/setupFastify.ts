@@ -27,6 +27,7 @@ import { readFile } from "fs/promises";
 import fastifyJwt from "@fastify/jwt";
 import meRoutes from "./routes/v1/me";
 import forgotPasswordRoutes from "./routes/v1/forgot-password";
+import AppError from "./utils/errors/AppError";
 
 export const setupFastify = async (fastify: FastifyInstance) => {
 	const __filename = fileURLToPath(import.meta.url);
@@ -144,7 +145,6 @@ export const setupFastify = async (fastify: FastifyInstance) => {
 				},
 			});
 		}
-
 		if (isResponseSerializationError(error)) {
 			const { cause, method, url } = error;
 			const { issues } = cause;
@@ -156,6 +156,21 @@ export const setupFastify = async (fastify: FastifyInstance) => {
 					details: { issues, method, url },
 				},
 			});
+		}
+		if (error instanceof AppError) {
+			const statusCode = error.statusCode || 500;
+			const { message } = error;
+			reply
+				.code(statusCode)
+				.type("application/json")
+				.send({
+					error: {
+						type: error.type,
+						statusCode,
+						message,
+						details: { method, url },
+					},
+				});
 		}
 		fastify.log.error(error);
 		const statusCode = error.statusCode || 500;

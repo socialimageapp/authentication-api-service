@@ -2,6 +2,7 @@
 	"type": "module",
 	"private": true,
 	"scripts": {
+		"build:submodules": "tsx .config/scripts/buildSubmodules.ts",
 		"upgradeAst": "cd lib/ast && pnpm install && pnpm build && cd ../../ && pnpm upgrade @adventurai/shared-types",
 		"knip": "knip",
 		"depCheck:svg": "npx depcruise src --include-only \"^src\" --output-type dot | dot -T svg > dependency-graph.svg",
@@ -12,9 +13,14 @@
 		"test:types": "tsc --project tsconfig.json --noEmit",
 		"test": "pnpm test:types",
 		"test:mocha": "mocha  --import=tsx/esm 'src/**/*.test.ts'",
-		"lint": "cross-env eslint -c eslint.config.js"
+		"lint": "cross-env eslint -c eslint.config.js",
+		"email:build": "email build",
+		"email:dev": "email dev --dir src/emails",
+		"email:export": "email export"
 	},
 	"devDependencies": {
+		"@types/react": "18.3.4",
+		"@types/react-dom": "18.3.0",
 		"@testcontainers/postgresql": "^10.13.2",
 		"@types/bcrypt": "^5.0.2",
 		"@types/bcryptjs": "^2.4.6",
@@ -42,7 +48,10 @@
 		"typescript-eslint": "^8.11.0"
 	},
 	"dependencies": {
-		"@adventurai/shared-types": "link:lib/ast",
+		"@react-email/components": "0.0.25",
+		"react-email": "3.0.1",
+		"react-dom": "18.3.1",
+		"react": "18.3.1",
 		"@aws-sdk/client-ses": "^3.679.0",
 		"@fastify/autoload": "^6.0.2",
 		"@fastify/cors": "^10.0.1",
@@ -62,8 +71,8 @@
 		"deepmerge": "^4.3.1",
 		"dotenv": "^16.4.5",
 		"drizzle-kit": "^0.25.0",
-		"drizzle-orm": "0.34.1",
-		"drizzle-zod": "0.5.1",
+		"drizzle-orm": "^0.34.1",
+		"drizzle-zod": "^0.5.1",
 		"fastify": "^5.0.0",
 		"fastify-favicon": "^5.0.0",
 		"fastify-no-icon": "^7.0.0",

@@ -2,6 +2,14 @@
  * Copyright (c) 2020-2024, Social Image Ltd. All rights reserved.
  */
 
+type BusinessConfig = {
+	name: string;
+	website: string;
+	email: string;
+	logo: {
+		horizontal: string;
+	};
+};
 interface ApiConfig {
 	basePath: { v1: string };
 	description?: string;
@@ -9,9 +17,19 @@ interface ApiConfig {
 	version?: string;
 	allowedOrigins: string[];
 	docsPath?: string;
+	business: BusinessConfig;
 }
 
 const config: ApiConfig = {
+	business: {
+		email: "contact@adventur.ai",
+		name: "AdVentur.ai",
+		website: "https://adventur.ai",
+		logo: {
+			horizontal:
+				"https://res.cloudinary.com/social-image-app/image/upload/v1729945562/logo_g3dmcl.png",
+		},
+	},
 	docsPath: "/docs",
 	version: "1.0.0",
 	allowedOrigins: [

@@ -3,7 +3,7 @@
  */
 
 import { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import { UserSchema, withResult } from "lib/ast/dist";
+import { UserSchema, withResult } from "@adventurai/shared-types";
 import { z } from "zod";
 
 const usersRoutes: FastifyPluginAsyncZod = async function (fastify) {

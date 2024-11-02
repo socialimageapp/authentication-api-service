@@ -7,7 +7,7 @@ import Fastify from "fastify";
 import request from "supertest";
 import { authDatabase } from "src/configs/db";
 import { setupFastifyTestEnv } from "src/setupFastify";
-import { Email, LoginPostPayload, organizations, users } from "lib/ast/dist";
+import { Email, LoginPostPayload, organizations, users } from "@adventurai/shared-types";
 import { eq } from "drizzle-orm";
 import { registerAndVerifyUser } from "../register/register.test";
 let testUserId: string;

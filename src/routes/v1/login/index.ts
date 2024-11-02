@@ -28,19 +28,19 @@ const loginRoutes: FastifyPluginAsyncZod = async function (fastify) {
 				where: (users, { eq }) => eq(users.email, email),
 			});
 
-			if (!user) {
-				throw new AppError("Invalid email or password", 401);
-			}
+			// Dummy hash to prevent timing attacks
+			const dummyHash = "$2b$10$" + "X".repeat(53);
+			const passwordMatch = !user
+				? await bcrypt.compare(password, dummyHash)
+				: await bcrypt.compare(password, user.password);
 
-			const passwordMatch = await bcrypt.compare(password, user.password);
-			if (!passwordMatch) {
-				throw new AppError("Invalid email or password", 401);
+			if (!user || !passwordMatch) {
+				throw new AppError(
+					"Invalid email or password",
+					401,
+					"InvalidCredentials",
+				);
 			}
-
-			if (!user.verified) {
-				throw new AppError("Please verify your email before logging in", 403);
-			}
-
 			const token = fastify.jwt.sign(
 				{ sub: user.id, email: user.email, role: user.userType },
 				{ expiresIn: "1h" },

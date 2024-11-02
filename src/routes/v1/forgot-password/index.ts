@@ -6,7 +6,7 @@ import {
 	ForgotPasswordResultSchema,
 	userVerificationRequests,
 	withResult,
-} from "lib/ast/dist";
+} from "@adventurai/shared-types";
 import { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { emailQueue } from "src/queues";
 

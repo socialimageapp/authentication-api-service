@@ -5,6 +5,7 @@ import { drizzle } from "drizzle-orm/node-postgres";
 import pg from "pg";
 import { authSchema } from "@adventurai/shared-types";
 
+export { authSchema };
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const envPath = path.join(
