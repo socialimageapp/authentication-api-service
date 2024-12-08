@@ -7,7 +7,7 @@
 		"knip": "knip",
 		"depCheck:svg": "npx depcruise src --include-only \"^src\" --output-type dot | dot -T svg > dependency-graph.svg",
 		"depCheck": "npx depcruise src --include-only \"^src\"",
-		"build": "tsc",
+		"build": "pnpm run build:submodules && tsc",
 		"start": "node dist/index.js",
 		"dev": "nodemon src/index.ts",
 		"test:types": "tsc --project tsconfig.json --noEmit",
