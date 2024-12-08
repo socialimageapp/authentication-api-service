@@ -24,7 +24,7 @@ const meRoutes: FastifyPluginAsyncZod = async function (fastify) {
 			});
 
 			if (!user) {
-				throw new AppError("User not found", 404);
+				throw new AppError("User not found", 404, "");
 			}
 
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars

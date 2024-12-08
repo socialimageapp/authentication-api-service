@@ -25,7 +25,7 @@ const userRoutes: FastifyPluginAsyncZod = async function (fastify) {
 				.findFirst({ where: (users, { eq }) => eq(users.id, userId) })
 				.execute()) as User | null;
 			if (!user) {
-				throw new AppError("User not found", 404);
+				throw new AppError("User not found", 404, "");
 			}
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			const { password, ...result } = user;

@@ -44,7 +44,7 @@ const verifyUser = async (userId: UserId, token: string, fastify: FastifyInstanc
 			with: { user: true },
 		});
 	if (foundUserVerificationRequests.length === 0) {
-		throw new AppError("User Id or Verification Token is Invalid", 400);
+		throw new AppError("User Id or Verification Token is Invalid", 400, "");
 	}
 
 	const userVerificationRequest = foundUserVerificationRequests[0];
@@ -64,7 +64,7 @@ const verifyUser = async (userId: UserId, token: string, fastify: FastifyInstanc
 			await setupUserAccount(user as User, fastify);
 		} catch (error) {
 			fastify.log.error(error);
-			throw new AppError("Error setting up account", 500);
+			throw new AppError("Error setting up account", 500, "");
 		}
 	}
 	await authDatabase
