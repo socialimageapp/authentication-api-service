@@ -1,6 +1,6 @@
 import crypto from "crypto";
-import { senders } from "src/utils/email";
-import { authDatabase } from "src/configs/db";
+import { senders } from "src/utils/email.js";
+import { authDatabase } from "src/configs/db.js";
 import {
 	ForgotPasswordPayloadSchema,
 	ForgotPasswordResultSchema,
@@ -8,7 +8,7 @@ import {
 	withResult,
 } from "@adventurai/shared-types";
 import { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import { emailQueue } from "src/queues";
+import { emailQueue } from "src/queues/email.js";
 
 const forgotPasswordRoutes: FastifyPluginAsyncZod = async function (fastify) {
 	fastify.post("/", {

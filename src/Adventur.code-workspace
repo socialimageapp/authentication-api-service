@@ -1,0 +1,35 @@
+{
+	"folders": [
+		{
+			"path": "../../social-image-backend",
+		},
+		{
+			"path": "../../socialimage-app",
+		},
+		{
+			"path": "..",
+		},
+		{
+			"path": "../../adventurai-shared-types",
+		},
+		{
+			"path": "../../adventur-backend",
+		},
+		{
+			"path": "../../generate-api-service",
+		},
+		{
+			"path": "../../react-email-starter",
+		},
+		{
+			"path": "../../dayz-server",
+		},
+	],
+	"settings": {
+		"i18n-ally.extract.keyMaxLength": 70,
+		"i18n-ally.sortKeys": true,
+		"i18n-ally.translate.overrideExisting": true,
+		"i18n-ally.keystyle": "nested",
+		"i18n-ally.pathMatcher": "{locale}/translation.json",
+	},
+}

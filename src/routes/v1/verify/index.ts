@@ -14,9 +14,9 @@ import {
 	VerifyEmailPayloadSchema,
 	withResult,
 } from "@adventurai/shared-types";
-import AppError from "src/utils/errors/AppError";
+import AppError from "src/utils/errors/AppError.js";
 import { eq } from "drizzle-orm";
-import { authDatabase } from "src/configs/db";
+import { authDatabase } from "src/configs/db.js";
 import { FastifyInstance } from "fastify";
 
 async function setupUserAccount(user: User, fastify: FastifyInstance) {

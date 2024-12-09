@@ -5,8 +5,8 @@ import Fastify from "fastify";
 import path, { join } from "path";
 import fastifyFavicon from "fastify-favicon";
 import autoLoad from "@fastify/autoload";
-import { setupFastify } from "./setupFastify";
-import config from "./configs/api";
+import { setupFastify } from "./setupFastify.js";
+import config from "./configs/api.js";
 import { fileURLToPath } from "url";
 
 const PORT = process.env.PORT || "3000";

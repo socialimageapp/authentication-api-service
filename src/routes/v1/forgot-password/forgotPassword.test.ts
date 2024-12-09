@@ -5,8 +5,8 @@ import { describe } from "mocha";
 import { expect } from "chai";
 import Fastify from "fastify";
 import request from "supertest";
-import { authDatabase } from "src/configs/db";
-import { setupFastifyTestEnv } from "src/setupFastify";
+import { authDatabase } from "src/configs/db.js";
+import { setupFastifyTestEnv } from "src/setupFastify.js";
 import {
 	Email,
 	ForgotPasswordPayload,
@@ -16,7 +16,7 @@ import {
 	VerifyEmailPayload,
 } from "@adventurai/shared-types";
 import { eq } from "drizzle-orm";
-import { registerAndVerifyUser } from "../register/register.test";
+import { registerAndVerifyUser } from "../register/register.test.js";
 let testUserId: string;
 
 describe("Forgot Password Flow", function () {

@@ -14,12 +14,12 @@ import {
 } from "@adventurai/shared-types";
 import crypto from "crypto";
 import bcrypt from "bcrypt";
-import { senders } from "src/utils/email";
+import { senders } from "src/utils/email.js";
 import { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import AppError from "src/utils/errors/AppError";
-import { authDatabase } from "src/configs/db";
+import AppError from "src/utils/errors/AppError.js";
+import { authDatabase } from "src/configs/db.js";
 import { FastifyInstance } from "fastify";
-import { emailQueue } from "src/queues";
+import { emailQueue } from "src/queues/email.js";
 
 const AUTH_MESSAGES = {
 	LOGIN_FAILED: "Invalid email or password",

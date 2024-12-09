@@ -4,18 +4,21 @@
 		"module": "NodeNext",
 		"moduleResolution": "nodenext",
 		"declaration": true,
-		"lib": ["ES2023"],
+		"lib": ["ES2020"],
 		"outDir": "./dist",
 		"rootDir": "./src",
 		"strict": true,
 		"esModuleInterop": true,
 		"baseUrl": ".",
 		"skipLibCheck": true,
-		"jsx": "react-jsx",
 		"declarationMap": true,
 		"alwaysStrict": true,
-		"paths": {},
-		"forceConsistentCasingInFileNames": true
+		"paths": {
+			"src/*": ["./src/*"]
+		},
+		"jsx": "react-jsx",
+		"forceConsistentCasingInFileNames": true,
+		"plugins": [{ "transform": "typescript-transform-paths" }]
 	},
 	"include": ["./src/**/*"],
 	"exclude": ["node_modules", "dist"]

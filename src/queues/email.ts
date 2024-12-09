@@ -1,8 +1,8 @@
 import { Queue, Worker } from "bullmq";
 import IORedis from "ioredis";
-import { EmailArgs, sendEmail } from "src/utils/email";
+import { EmailArgs, sendEmail } from "src/utils/email.js";
 
-const connection = new IORedis({ maxRetriesPerRequest: null });
+const connection = new IORedis.default({ maxRetriesPerRequest: null });
 
 type EmailQueueJobNames = "sendEmail";
 

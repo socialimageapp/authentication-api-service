@@ -17,17 +17,17 @@ import {
 } from "fastify-type-provider-zod";
 import helmet from "@fastify/helmet";
 import { NotFoundError, OrganizationSchema, UserSchema } from "@adventurai/shared-types";
-import config from "src/configs/api";
-import registerRoutes from "src/routes/v1/register";
-import verifyRoutes from "src/routes/v1/verify";
-import loginRoutes from "src/routes/v1/login";
+import config from "src/configs/api.js";
+import registerRoutes from "src/routes/v1/register/index.js";
+import verifyRoutes from "src/routes/v1/verify/index.js";
+import loginRoutes from "src/routes/v1/login/index.js";
 import dotenv from "dotenv";
 import path, { resolve } from "path";
 import { readFile } from "fs/promises";
 import fastifyJwt from "@fastify/jwt";
-import meRoutes from "./routes/v1/me";
-import forgotPasswordRoutes from "./routes/v1/forgot-password";
-import AppError from "./utils/errors/AppError";
+import meRoutes from "./routes/v1/me/index.js";
+import forgotPasswordRoutes from "./routes/v1/forgot-password/index.js";
+import AppError from "./utils/errors/AppError.js";
 
 export const setupFastify = async (fastify: FastifyInstance) => {
 	const __filename = fileURLToPath(import.meta.url);

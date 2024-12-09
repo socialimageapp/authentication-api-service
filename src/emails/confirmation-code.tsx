@@ -10,7 +10,7 @@ import {
 	Text,
 } from "@react-email/components";
 import * as React from "react";
-import config from "src/configs/api";
+import config from "src/configs/api.js";
 
 interface ConfirmationCodeProps {
 	code?: string;

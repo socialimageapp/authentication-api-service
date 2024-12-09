@@ -8,8 +8,8 @@ import {
 	withResult,
 } from "@adventurai/shared-types";
 import { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
-import { authDatabase } from "src/configs/db";
-import AppError from "src/utils/errors/AppError";
+import { authDatabase } from "src/configs/db.js";
+import AppError from "src/utils/errors/AppError.js";
 import bcrypt from "bcrypt";
 
 const loginRoutes: FastifyPluginAsyncZod = async function (fastify) {

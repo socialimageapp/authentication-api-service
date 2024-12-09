@@ -2,7 +2,7 @@
 import { SES, SendEmailCommandInput } from "@aws-sdk/client-ses";
 import { render } from "@react-email/components";
 import { z } from "zod";
-import { ConfirmationCode } from "src/emails/confirmation-code";
+import { ConfirmationCode } from "src/emails/confirmation-code.js";
 const sesClient = new SES({ region: process.env.AWS_REGION || "us-east-1" });
 
 export const emailTemplates = {

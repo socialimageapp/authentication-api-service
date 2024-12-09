@@ -5,8 +5,8 @@
 import { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { z } from "zod";
 import { User, UserIdSchema, UserSchema, withResult } from "@adventurai/shared-types";
-import { authDatabase } from "src/configs/db";
-import AppError from "src/utils/errors/AppError";
+import { authDatabase } from "src/configs/db.js";
+import AppError from "src/utils/errors/AppError.js";
 
 const UserParamsSchema = z.object({ userId: UserIdSchema });
 

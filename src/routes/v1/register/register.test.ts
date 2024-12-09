@@ -5,9 +5,9 @@ import { describe } from "mocha";
 import { expect } from "chai";
 import Fastify, { FastifyInstance } from "fastify";
 import request from "supertest";
-import { authDatabase } from "src/configs/db";
+import { authDatabase } from "src/configs/db.js";
 import { v4 as uuidv4 } from "uuid";
-import { setupFastifyTestEnv } from "src/setupFastify";
+import { setupFastifyTestEnv } from "src/setupFastify.js";
 import {
 	Email,
 	organizations,
