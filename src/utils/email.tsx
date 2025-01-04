@@ -43,7 +43,7 @@ export const emailTemplates = {
 	},
 	confirmEmail: {
 		id: "d-29c40aa6582d40df85535c6b59278f14",
-		subject: "Confirm your email",
+		subject: " your email",
 		schema: z.object({ verificationCode: z.string(), name: z.string() }),
 	},
 	verifyAccount: {

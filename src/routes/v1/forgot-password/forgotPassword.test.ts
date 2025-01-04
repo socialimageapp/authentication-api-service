@@ -11,7 +11,6 @@ import {
 	Email,
 	ForgotPasswordPayload,
 	organizations,
-	UserId,
 	users,
 	VerifyEmailPayload,
 } from "@adventurai/shared-types";
@@ -61,7 +60,7 @@ describe("Forgot Password Flow", function () {
 			.get("/api/v1/verify")
 			.query({
 				token: token?.token as string,
-				userId: testUserId as UserId,
+				email: user.email as Email,
 			} satisfies VerifyEmailPayload)
 			.send();
 

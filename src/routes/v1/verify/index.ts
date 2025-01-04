@@ -4,11 +4,11 @@
 
 import { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import {
+	Email,
 	organizations,
 	organizationUsers,
 	ResetPasswordResultSchema,
 	User,
-	UserId,
 	users,
 	userVerificationRequests,
 	VerifyEmailPayloadSchema,
@@ -37,7 +37,7 @@ async function setupUserAccount(user: User, fastify: FastifyInstance) {
 	});
 }
 
-const verifyUser = async (userId: UserId, token: string, fastify: FastifyInstance) => {
+const verifyUser = async (email: Email, token: string, fastify: FastifyInstance) => {
 	const foundUserVerificationRequests =
 		await authDatabase.query.userVerificationRequests.findMany({
 			where: (requests, { eq, and }) => and(eq(requests.token, token)),
@@ -52,7 +52,7 @@ const verifyUser = async (userId: UserId, token: string, fastify: FastifyInstanc
 	const user = userVerificationRequest.user;
 
 	const currentUser = await authDatabase.query.users.findFirst({
-		where: (users, { eq }) => eq(users.id, userId),
+		where: (users, { eq }) => eq(users.email, email),
 	});
 
 	if (currentUser?.verified === false) {
@@ -82,8 +82,8 @@ const verifyRoutes: FastifyPluginAsyncZod = async function (fastify) {
 			response: { 200: withResult(ResetPasswordResultSchema) },
 		},
 		handler: async (request, reply) => {
-			const { token, userId } = request.body;
-			await verifyUser(userId, token, fastify);
+			const { token, email } = request.body;
+			await verifyUser(email, token, fastify);
 			return reply.send({ result: { message: "Account verified" } });
 		},
 	});
@@ -96,8 +96,8 @@ const verifyRoutes: FastifyPluginAsyncZod = async function (fastify) {
 			response: { 200: withResult(ResetPasswordResultSchema) },
 		},
 		handler: async (request, reply) => {
-			const { token, userId } = request.query;
-			await verifyUser(userId, token, fastify);
+			const { token, email } = request.query;
+			await verifyUser(email, token, fastify);
 			return reply.send({ result: { message: "Account verified" } });
 		},
 	});

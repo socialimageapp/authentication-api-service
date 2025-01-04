@@ -1,0 +1,63 @@
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres_container
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    networks:
+        - my-net
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: pgadmin_container
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    networks:
+        - my-net
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+  redis:
+    image: redis:latest
+    container_name: redis_container
+    restart: always
+    hostname: redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+        - my-net
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: redis_commander_container
+    hostname: redis-commander
+    restart: always
+    environment:
+      REDIS_HOSTS: redis_container
+    ports:
+      - "8081:8081"
+    networks:
+        - my-net
+    depends_on:
+      - redis
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+  redis_data:
+networks:
+    my-net:

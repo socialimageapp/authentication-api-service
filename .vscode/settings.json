@@ -2,12 +2,14 @@
 	"cSpell.words": [
 		"adventurai",
 		"autoload",
+		"bullmq",
 		"deepmerge",
 		"depcruise",
 		"Dynamoose",
 		"Fastify",
 		"knip",
 		"openapi",
+		"pkce",
 		"sendgrid"
 	],
 	"eslint.workingDirectories": ["./src"]

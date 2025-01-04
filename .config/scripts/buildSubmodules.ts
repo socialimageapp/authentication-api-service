@@ -11,14 +11,20 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const libPath = resolve(__dirname, "../../lib");
 const nodeModulesPath = resolve(__dirname, "../../node_modules");
 
+console.log(`libPath: ${libPath}`);
+console.log(`nodeModulesPath: ${nodeModulesPath}`);
+
 // Get all directories inside the lib/ folder
 const directories = readdirSync(libPath, { withFileTypes: true })
 	.filter((dir) => dir.isDirectory())
 	.map((dir) => dir.name);
 
+console.log(`Found directories: ${directories.join(", ")}`);
+
 await Promise.allSettled(
 	directories.map(async (dirName) => {
 		const dirPath = join(libPath, dirName);
+		console.log(`Processing directory: ${dirPath}`);
 
 		// Install dependencies and build the project
 		try {
@@ -45,6 +51,8 @@ await Promise.allSettled(
 			return;
 		}
 
+		console.log(`Package name: ${packageName}`);
+
 		// Move the build output to the correct node_modules location
 		const distPath = join(dirPath, "dist");
 		const targetPath = join(nodeModulesPath, packageName);
@@ -55,8 +63,11 @@ await Promise.allSettled(
 		}
 
 		try {
+			console.log(`Removing existing package at ${targetPath}`);
 			await rm(targetPath, { recursive: true, force: true }); // Clear any existing package version in node_modules
+			console.log(`Copying dist to ${targetPath}`);
 			await cp(distPath, join(targetPath, "dist"), { recursive: true }); // Move dist to the package location in node_modules
+			console.log(`Copying package.json to ${targetPath}`);
 			await cp(packageJsonPath, join(targetPath, "package.json")); // Move dist to the package location in node_modules
 			console.log(`Moved ${packageName} to node_modules/${packageName}`);
 		} catch (error) {
