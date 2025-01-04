@@ -117,6 +117,7 @@ const registerRoutes: FastifyPluginAsyncZod = async function (fastify) {
 						"UserExistsLoginRequired",
 					);
 				}
+
 				await sendNewAuthenticationRequest(existingUsers[0].id, fastify);
 
 				return reply.send({
