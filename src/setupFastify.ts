@@ -20,7 +20,7 @@ import { NotFoundError, OrganizationSchema, UserSchema } from "@adventurai/share
 import config from "src/configs/api.js";
 import registerRoutes from "src/routes/v1/register/index.js";
 import verifyRoutes from "src/routes/v1/verify/index.js";
-import loginRoutes from "src/routes/v1/login/index.js";
+import loginRoutes from "src/routes/v1/login/google/callback/index.js";
 import dotenv from "dotenv";
 import path, { resolve } from "path";
 import { readFile } from "fs/promises";
@@ -28,6 +28,7 @@ import fastifyJwt from "@fastify/jwt";
 import meRoutes from "./routes/v1/me/index.js";
 import forgotPasswordRoutes from "./routes/v1/forgot-password/index.js";
 import AppError from "./utils/errors/AppError.js";
+import cookie from "@fastify/cookie";
 
 export const setupFastify = async (fastify: FastifyInstance) => {
 	const __filename = fileURLToPath(import.meta.url);
@@ -42,6 +43,7 @@ export const setupFastify = async (fastify: FastifyInstance) => {
 	fastify.setSerializerCompiler(serializerCompiler);
 
 	await fastify.register(helmet);
+	await fastify.register(cookie, {});
 	await fastify.register(fastifyJwt, { secret: process.env.JWT_SECRET || "secr3t" });
 	await fastify.register(fastifyStatic, {
 		root: path.join(__dirname, "../public"),
