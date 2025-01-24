@@ -44,7 +44,10 @@ export const setupFastify = async (fastify: FastifyInstance) => {
 
 	await fastify.register(helmet);
 	await fastify.register(cookie, {});
-	await fastify.register(fastifyJwt, { secret: process.env.JWT_SECRET || "secr3t" });
+	await fastify.register(fastifyJwt, {
+		secret: process.env.JWT_SECRET || "secr3t",
+		cookie: { cookieName: "accessToken", signed: false },
+	});
 	await fastify.register(fastifyStatic, {
 		root: path.join(__dirname, "../public"),
 		prefix: "/public/",
@@ -69,7 +72,7 @@ export const setupFastify = async (fastify: FastifyInstance) => {
 				version: config.version ?? "1.0.0",
 			},
 			servers: [
-				{ url: `http://localhost:${PORT}`, description: "Development server" },
+				{ url: `http://127.0.0.1:${PORT}`, description: "Development server" },
 			],
 			tags: [
 				{
@@ -97,7 +100,7 @@ export const setupFastify = async (fastify: FastifyInstance) => {
 		},
 	});
 	await fastify.register(fastifyCors, {
-		origin: config.allowedOrigins ?? "*",
+		origin: "*",
 		methods: ["GET", "POST", "PUT", "DELETE"],
 		allowedHeaders: ["Content-Type", "Authorization"],
 		credentials: true,
