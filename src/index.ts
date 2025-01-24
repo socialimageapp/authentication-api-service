@@ -18,10 +18,10 @@ const __dirname = path.dirname(__filename);
 const fastify = await setupFastify(Fastify({ logger: true }));
 
 await fastify.register(fastifyFavicon, { path: path.join(__dirname, "../") });
-fastify.register(autoLoad, {
+await fastify.register(autoLoad, {
 	dir: join(__dirname, "plugins"),
 });
-fastify.register(autoLoad, {
+await fastify.register(autoLoad, {
 	dir: join(__dirname, "routes/v1"),
 	options: { prefix: config.basePath.v1 },
 	ignoreFilter: (path) => path.endsWith(".test.ts"),
