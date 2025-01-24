@@ -8,5 +8,5 @@ export default config(
 	...configs.recommended,
 	{ rules: { "no-console": "error" } },
 	{ files: ["src/**/*.ts"] },
-	{ ignores: ["**/*.js", "*.cjs", "lib/*", "dist/*"] },
+	{ ignores: ["**/*.js", "*.cjs", "lib/*", "dist/*", "production/*"] },
 );
