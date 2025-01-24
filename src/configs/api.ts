@@ -33,7 +33,11 @@ const config: ApiConfig = {
 	docsPath: "/docs",
 	version: "1.0.0",
 	allowedOrigins: [
+		process.env.FRONTEND_URL ?? "http://localhost:3000",
+		"https://127.0.0.1:3000",
 		"https://localhost:3000",
+		"http://localhost:3000",
+		"http://127.0.0.1:3000",
 		"https://app.adventur.ai",
 		"https://develop.app.adventur.ai",
 	],
