@@ -36,7 +36,7 @@ const AUTH_MESSAGES = {
  * @param password - The plain-text password to hash.
  * @returns - The hashed password.
  */
-async function hashPassword(password: string): Promise<string> {
+export async function hashPassword(password: string): Promise<string> {
 	const saltRounds = 12;
 	const salt = await bcrypt.genSalt(saltRounds);
 	return await bcrypt.hash(password, salt);

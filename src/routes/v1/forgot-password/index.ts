@@ -31,7 +31,7 @@ const forgotPasswordRoutes: FastifyPluginAsyncZod = async function (fastify) {
 						token,
 						expiresAt,
 					});
-					const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}&userId=${user.id}`;
+					const resetLink = `${process.env.FRONTEND_URL}/reset-password?token=${token}`;
 					await emailQueue.add("sendEmail", {
 						dynamicTemplateData: {
 							name: `${user.firstName} ${user.lastName}`,

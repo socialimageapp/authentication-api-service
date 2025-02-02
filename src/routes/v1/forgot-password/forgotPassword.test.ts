@@ -42,26 +42,26 @@ describe("Forgot Password Flow", function () {
 
 	it("should create a user and reset their password", async function () {
 		const { user } = await registerAndVerifyUser(fastify);
+
 		testUserId = user.id;
+
 		const response = await request(fastify.server)
 			.post("/api/v1/forgot-password")
 			.send({ email: user.email as Email } satisfies ForgotPasswordPayload);
+
 		expect(response.body.result.message).to.equal(
 			"If that email address exists in our system, we have sent a password reset link to it.",
 		);
 		expect(response.body.result.message).to.be.a("string");
+
 		const token = await authDatabase.query.userVerificationRequests
-			.findFirst({
-				where: (req, { eq }) => eq(req.userId, user.id),
-			})
+			.findFirst({ where: (req, { eq }) => eq(req.userId, user.id) })
 			.execute();
+
 		expect(token).to.not.be.eq(undefined);
 		const verifyResponse = await request(fastify.server)
 			.get("/api/v1/verify")
-			.query({
-				token: token?.token as string,
-				email: user.email as Email,
-			} satisfies VerifyEmailPayload)
+			.query({ token: token?.token as string } satisfies VerifyEmailPayload)
 			.send();
 
 		expect(verifyResponse.body.result.message).to.equal("Account verified");

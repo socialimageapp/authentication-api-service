@@ -12,7 +12,7 @@ const authConfig: FastifyOAuth2Options = {
 		client: { id: GOOGLE_OAUTH_CLIENT_ID, secret: GOOGLE_OAUTH_CLIENT_SECRET },
 		auth: oauthPlugin.fastifyOauth2.GOOGLE_CONFIGURATION,
 	},
-	startRedirectPath: `${config.basePath.v1}/login/google`,
+	startRedirectPath: `${config.basePath.v1}/login/google/test`,
 	callbackUri: (req) =>
 		req.hostname === "localhost"
 			? `${req.protocol}://localhost:${process.env.PORT || 7071}${config.basePath.v1}/login/google/callback`

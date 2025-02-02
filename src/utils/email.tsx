@@ -3,6 +3,7 @@ import { SES, SendEmailCommandInput } from "@aws-sdk/client-ses";
 import { render } from "@react-email/components";
 import { z } from "zod";
 import { ConfirmationCode } from "src/emails/confirmation-code.js";
+import { ResetPassword } from "src/emails/reset-password.js";
 const sesClient = new SES({ region: process.env.AWS_REGION || "us-east-1" });
 
 export const emailTemplates = {
@@ -88,10 +89,16 @@ const getEmailHTML = async (args: EmailArgs): Promise<{ text: string; html: stri
 				type="register"
 				{...dynamicTemplateData}
 			/>,
-			{
-				plainText: true,
-			},
+			{ plainText: true },
 		);
+		const html = await render(<Component {...dynamicTemplateData} />);
+		return { text, html };
+	}
+	if (template === "resetPassword") {
+		const Component = ResetPassword;
+		const text = await render(<Component {...dynamicTemplateData} />, {
+			plainText: true,
+		});
 		const html = await render(<Component {...dynamicTemplateData} />);
 		return { text, html };
 	}

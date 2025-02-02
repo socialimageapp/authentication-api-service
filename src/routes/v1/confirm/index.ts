@@ -4,13 +4,14 @@
 
 import { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import {
+	ConfirmEmailPayloadSchema,
+	Email,
 	organizations,
 	organizationUsers,
 	ResetPasswordResultSchema,
 	User,
 	users,
 	userVerificationRequests,
-	VerifyEmailPayloadSchema,
 	withResult,
 } from "@adventurai/shared-types";
 import AppError from "src/utils/errors/AppError.js";
@@ -36,7 +37,14 @@ async function setupUserAccount(user: User, fastify: FastifyInstance) {
 	});
 }
 
-const verifyUser = async (token: string, fastify: FastifyInstance) => {
+/**
+ * Confirms the user email with email and token
+ */
+const confirmUserEmail = async (
+	email: Email,
+	token: string,
+	fastify: FastifyInstance,
+) => {
 	const foundUserVerificationRequests =
 		await authDatabase.query.userVerificationRequests.findMany({
 			where: (requests, { eq, and }) => and(eq(requests.token, token)),
@@ -74,29 +82,29 @@ const verifyUser = async (token: string, fastify: FastifyInstance) => {
 const verifyRoutes: FastifyPluginAsyncZod = async function (fastify) {
 	fastify.post("/", {
 		schema: {
-			summary: "Verify Account",
-			description: "Verifies the user account using the provided token",
+			summary: "Confirm Email",
+			description: "Verifies the user account using the provided code and email",
 			tags: ["Authentication"],
-			body: VerifyEmailPayloadSchema,
+			body: ConfirmEmailPayloadSchema,
 			response: { 200: withResult(ResetPasswordResultSchema) },
 		},
 		handler: async (request, reply) => {
-			const { token } = request.body;
-			await verifyUser(token, fastify);
+			const { token, email } = request.body;
+			await confirmUserEmail(email, token, fastify);
 			return reply.send({ result: { message: "Account verified" } });
 		},
 	});
 	fastify.get("/", {
 		schema: {
 			summary: "Verify Account",
-			description: "Verifies the user account using the provided token",
+			description: "Verifies the user account using the provided code and email",
 			tags: ["Authentication"],
-			querystring: VerifyEmailPayloadSchema,
+			querystring: ConfirmEmailPayloadSchema,
 			response: { 200: withResult(ResetPasswordResultSchema) },
 		},
 		handler: async (request, reply) => {
-			const { token } = request.query;
-			await verifyUser(token, fastify);
+			const { token, email } = request.query;
+			await confirmUserEmail(email, token, fastify);
 			return reply.send({ result: { message: "Account verified" } });
 		},
 	});
