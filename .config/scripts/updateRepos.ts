@@ -71,6 +71,7 @@ const updateSubmoduleAndInstall = async () => {
 		runCommand(`git submodule update --init --recursive`, repoPath);
 		runCommand(`git fetch origin`, path.join(repoPath, submodulePath));
 		runCommand(`git checkout ${commitHash}`, path.join(repoPath, submodulePath));
+		runCommand("pnpm build:submodules", repoPath);
 		runCommand("pnpm upgrade", repoPath);
 	};
 

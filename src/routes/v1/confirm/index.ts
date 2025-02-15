@@ -6,8 +6,6 @@ import { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import {
 	ConfirmEmailPayloadSchema,
 	Email,
-	organizations,
-	organizationUsers,
 	ResetPasswordResultSchema,
 	User,
 	users,
@@ -18,23 +16,25 @@ import AppError from "src/utils/errors/AppError.js";
 import { eq } from "drizzle-orm";
 import { authDatabase } from "src/configs/db.js";
 import { FastifyInstance } from "fastify";
+import { createOrganization } from "src/utils/organization/createOrganization.js";
 
 async function setupUserAccount(user: User, fastify: FastifyInstance) {
-	const org = await authDatabase
-		.insert(organizations)
-		.values({
-			ownerId: user.id,
+	try {
+		const result = await createOrganization({
 			name: "My First Organization",
-			slug: crypto.randomUUID(),
+			user,
 			description: "My First Organization",
-		})
-		.returning();
-	fastify.log.info(`Created organization ${org[0].name} for user ${user.email}`);
-	await authDatabase.insert(organizationUsers).values({
-		organizationId: org[0].id,
-		userId: user.id,
-		roles: ["owner"],
-	});
+		});
+
+		fastify.log.info(
+			`Created organization ${result.organization.name} for user ${user.email}`,
+		);
+
+		return result;
+	} catch (error) {
+		fastify.log.error(error);
+		throw new AppError("Error setting up account", 500, "");
+	}
 }
 
 /**

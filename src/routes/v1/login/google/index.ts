@@ -42,6 +42,7 @@ const loginRoutes: FastifyPluginAsyncZod = async function (fastify) {
 			if (fastify.googleOAuth2 === undefined) {
 				throw new Error("OAuth2Google is not initialized");
 			}
+
 			const response = await fetch("https://oauth2.googleapis.com/token", {
 				method: "POST",
 				body: JSON.stringify({
@@ -79,38 +80,35 @@ const loginRoutes: FastifyPluginAsyncZod = async function (fastify) {
 				throw new Error(`Failed to get user info: ${userInfo.error_description}`);
 			}
 
-			const existingUsers = (await authDatabase.query.users.findMany({
-				where: (users, { eq }) => eq(users.email, userInfo.email),
-			})) as User[];
-			if (existingUsers.length > 0) {
-				const user = existingUsers[0];
-				const authToken = fastify.jwt.sign(
-					{ sub: user.id, email: user, role: user.userType },
-					{ expiresIn: "1h" },
-				);
-				return reply.send({
-					result: { token: authToken, user: userInfo },
-				});
-			} else {
-				const hashedPassword = await hashPassword(
-					crypto.randomBytes(10).toString("hex"),
-				);
-				const userPayload = {
-					email: userInfo.email,
-					password: hashedPassword,
-					firstName: userInfo.given_name,
-					lastName: userInfo.family_name,
-					enrolled: false,
-					username: userInfo.email,
-					userType: "user",
-					verified: false,
-				};
-				const newUser = await authDatabase
-					.insert(users)
-					.values(userPayload)
-					.returning();
+			try {
+				const existingUsers = (await authDatabase.query.users.findMany({
+					where: (users, { eq }) => eq(users.email, userInfo.email),
+				})) as User[];
 
-				const user = newUser[0];
+				let user: User;
+				if (existingUsers.length > 0) {
+					user = existingUsers[0];
+				} else {
+					const hashedPassword = await hashPassword(
+						crypto.randomBytes(10).toString("hex"),
+					);
+					const userPayload = {
+						email: userInfo.email,
+						password: hashedPassword,
+						firstName: userInfo.given_name,
+						lastName: userInfo.family_name,
+						enrolled: false,
+						username: userInfo.email,
+						userType: "user",
+						verified: false,
+					};
+					const newUser = await authDatabase
+						.insert(users)
+						.values(userPayload)
+						.returning();
+					user = newUser[0] as User;
+				}
+
 				const authToken = fastify.jwt.sign(
 					{ sub: user.id, email: user, role: user.userType },
 					{ expiresIn: "1h" },
@@ -118,6 +116,22 @@ const loginRoutes: FastifyPluginAsyncZod = async function (fastify) {
 				return reply.send({
 					result: { token: authToken, user: userInfo },
 				});
+			} catch (error) {
+				if (error instanceof Error && 'code' in error && error.code === '23505') {
+					// Handle race condition where user was created between our check and insert
+					const existingUser = (await authDatabase.query.users.findFirst({
+						where: (users, { eq }) => eq(users.email, userInfo.email),
+					})) as User;
+
+					const authToken = fastify.jwt.sign(
+						{ sub: existingUser.id, email: existingUser, role: existingUser.userType },
+						{ expiresIn: "1h" },
+					);
+					return reply.send({
+						result: { token: authToken, user: userInfo },
+					});
+				}
+				throw error;
 			}
 		},
 	});
