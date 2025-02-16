@@ -68,7 +68,6 @@ const sendNewAuthenticationRequest = async (
 			expiresAt: new Date(Date.now() + 1000 * 60 * 60 * 24),
 			token: generateVerificationCodeNumber().toString(),
 			type: "email",
-			createdAt: new Date(),
 		})
 		.returning();
 	// Get the user's email
@@ -90,7 +89,7 @@ const sendNewAuthenticationRequest = async (
 		sender: senders.contact,
 	});
 	fastify.log.warn(`Email sent: ${sent}`);
-	return verificationRequest[0] as UserVerificationRequest;
+	return verificationRequest[0] as unknown as UserVerificationRequest;
 };
 
 const registerRoutes: FastifyPluginAsyncZod = async function (fastify) {
@@ -107,7 +106,7 @@ const registerRoutes: FastifyPluginAsyncZod = async function (fastify) {
 
 			const existingUsers = (await authDatabase.query.users.findMany({
 				where: (users, { eq }) => eq(users.email, email),
-			})) as User[];
+			})) as unknown as User[];
 
 			if (existingUsers.length > 0) {
 				if (existingUsers[0].verified === true) {

@@ -23,7 +23,7 @@ const userRoutes: FastifyPluginAsyncZod = async function (fastify) {
 			const { userId } = request.params;
 			const user = (await authDatabase.query.users
 				.findFirst({ where: (users, { eq }) => eq(users.id, userId) })
-				.execute()) as User | null;
+				.execute()) as unknown as User | null;
 			if (!user) {
 				throw new AppError("User not found", 404, "");
 			}

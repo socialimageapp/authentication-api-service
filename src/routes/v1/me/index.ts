@@ -30,9 +30,9 @@ const meRoutes: FastifyPluginAsyncZod = async function (fastify) {
 			// eslint-disable-next-line @typescript-eslint/no-unused-vars
 			const { password, ...userWithoutPassword } = user;
 
-			return reply.send({ result: userWithoutPassword as User });
+			return reply.send({ result: userWithoutPassword as unknown as User });
 		},
 	});
-};
+};	
 
 export default meRoutes;

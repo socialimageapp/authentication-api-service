@@ -35,10 +35,7 @@ const organizationRoutes: FastifyPluginAsyncZod = async function (fastify) {
 					createdAt: new Date(),
 					updatedAt: new Date(),
 					font: "Arial",
-					identity: {
-						logo: "https://example.com/logo.png",
-						cover: "https://example.com/cover.png",
-					},
+					identity: {},
 					logos: {
 						horizontal: "https://example.com/horizontal.png",
 						vertical: "https://example.com/vertical.png",

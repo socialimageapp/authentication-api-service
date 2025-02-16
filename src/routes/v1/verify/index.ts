@@ -29,11 +29,10 @@ async function setupUserAccount(user: User, fastify: FastifyInstance) {
 		})
 		.returning();
 	fastify.log.info(`Created organization ${org[0].name} for user ${user.email}`);
-	await authDatabase.insert(organizationUsers).values({
+	await authDatabase.insert(organizationUsers).values([{
 		organizationId: org[0].id,
-		userId: user.id,
-		roles: ["owner"],
-	});
+		userId: user.id
+	}]);
 }
 
 const verifyUser = async (token: string, fastify: FastifyInstance) => {
@@ -60,7 +59,7 @@ const verifyUser = async (token: string, fastify: FastifyInstance) => {
 			.set({ verified: true })
 			.where(eq(users.id, user.id));
 		try {
-			await setupUserAccount(user as User, fastify);
+			await setupUserAccount(user as unknown as User, fastify);
 		} catch (error) {
 			fastify.log.error(error);
 			throw new AppError("Error setting up account", 500, "");

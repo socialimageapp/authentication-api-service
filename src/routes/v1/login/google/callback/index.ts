@@ -57,7 +57,7 @@ const loginRoutes: FastifyPluginAsyncZod = async function (fastify) {
 			};
 			const existingUsers = (await authDatabase.query.users.findMany({
 				where: (users, { eq }) => eq(users.email, userInfo.email),
-			})) as User[];
+			})) as unknown as User[];
 
 			if (existingUsers.length > 0) {
 				const user = existingUsers[0];

@@ -68,7 +68,7 @@ const confirmUserEmail = async (
 			.set({ verified: true })
 			.where(eq(users.id, user.id));
 		try {
-			await setupUserAccount(user as User, fastify);
+			await setupUserAccount(user as unknown as User, fastify);
 		} catch (error) {
 			fastify.log.error(error);
 			throw new AppError("Error setting up account", 500, "");

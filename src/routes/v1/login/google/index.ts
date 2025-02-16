@@ -83,7 +83,7 @@ const loginRoutes: FastifyPluginAsyncZod = async function (fastify) {
 			try {
 				const existingUsers = (await authDatabase.query.users.findMany({
 					where: (users, { eq }) => eq(users.email, userInfo.email),
-				})) as User[];
+				})) as unknown as User[];
 
 				let user: User;
 				if (existingUsers.length > 0) {
@@ -106,7 +106,7 @@ const loginRoutes: FastifyPluginAsyncZod = async function (fastify) {
 						.insert(users)
 						.values(userPayload)
 						.returning();
-					user = newUser[0] as User;
+					user = newUser[0] as unknown as User;
 				}
 
 				const authToken = fastify.jwt.sign(
@@ -121,7 +121,7 @@ const loginRoutes: FastifyPluginAsyncZod = async function (fastify) {
 					// Handle race condition where user was created between our check and insert
 					const existingUser = (await authDatabase.query.users.findFirst({
 						where: (users, { eq }) => eq(users.email, userInfo.email),
-					})) as User;
+					})) as unknown as User;
 
 					const authToken = fastify.jwt.sign(
 						{ sub: existingUser.id, email: existingUser, role: existingUser.userType },
