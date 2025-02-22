@@ -1,7 +1,7 @@
 {
 	"$schema": "https://json.schemastore.org/nodemon",
 	"watch": ["src", ".config"],
-	"ext": "ts,json,local",
+	"ext": "tsx,ts,json,local",
 	"ignore": ["dist"],
 	"delay": 500,
 	"exec": "tsx src/index.ts"

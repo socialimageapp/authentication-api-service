@@ -17,57 +17,56 @@ interface ConfirmationCodeProps {
 	type: "login" | "register";
 }
 
-export const ConfirmationCode = ({ code, type }: ConfirmationCodeProps) => (
-	<Html>
-		<Head />
-		<Preview>Here is your confirmation code</Preview>
-		<Body style={main}>
-			<Container style={container}>
-				<Heading style={h1}>Confirmation Code</Heading>
-				<Text style={{ ...text, marginBottom: "14px" }}>
-					Here is your confirmation code for {config.appName}.
-				</Text>
-				<code style={confirmationCode}>{code}</code>
-				<Text
-					style={{
-						...text,
-						color: "#ababab",
-						marginTop: "14px",
-						marginBottom: "16px",
-					}}
-				>
-					If you didn&apos;t try to {type}, you can safely ignore this email.
-				</Text>
-				<Img
-					src={config.business.logo.horizontal}
-					width="200"
-					height="100"
-					style={{ objectFit: "contain" }}
-					alt={`${config.appName}'s logo`}
-				/>
-				<Text style={footer}>
-					<Link
-						href={config.business.website}
-						target="_blank"
-						style={{ ...link, color: "#898989" }}
+export const ConfirmationCode = ({ code, type }: ConfirmationCodeProps) => {
+	console.log("code", code);
+	return (
+		<Html>
+			<Head />
+			<Preview>Here is your confirmation code</Preview>
+			<Body style={main}>
+				<Container style={container}>
+					<Heading style={h1}>Confirmation Code</Heading>
+					<Text style={{ ...text, marginBottom: "14px" }}>
+						Here is your confirmation code for {config.appName}.
+					</Text>
+					<code style={confirmationCode}>{code}</code>
+					<Text
+						style={{
+							...text,
+							color: "#ababab",
+							marginTop: "14px",
+							marginBottom: "16px",
+						}}
 					>
-						{config.appName}
-					</Link>
-					, AI Creatives and Marketing Automation
-					<br />
-					for your business.
-				</Text>
-			</Container>
-		</Body>
-	</Html>
-);
+						If you didn&apos;t try to {type}, you can safely ignore this
+						email.
+					</Text>
+					<Img
+						src={config.business.logo.horizontal}
+						width="200"
+						height="100"
+						style={{ objectFit: "contain" }}
+						alt={`${config.appName}'s logo`}
+					/>
+					<Text style={footer}>
+						<Link
+							href={config.business.website}
+							target="_blank"
+							style={{ ...link, color: "#898989" }}
+						>
+							{config.appName}
+						</Link>
+						, AI Creatives and Marketing Automation
+						<br />
+						for your business.
+					</Text>
+				</Container>
+			</Body>
+		</Html>
+	);
+};
 
 export default ConfirmationCode;
-
-ConfirmationCode.defaultProps = {
-	code: "123456",
-	type: "register",
-} satisfies ConfirmationCodeProps;
 
 const main = {
 	backgroundColor: "#ffffff",

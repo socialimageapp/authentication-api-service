@@ -84,13 +84,19 @@ const getEmailHTML = async (args: EmailArgs): Promise<{ text: string; html: stri
 		const Component = ConfirmationCode;
 		const text = await render(
 			<Component
+				{...dynamicTemplateData}
 				code={dynamicTemplateData.verificationCode}
 				type="register"
-				{...dynamicTemplateData}
 			/>,
 			{ plainText: true },
 		);
-		const html = await render(<Component {...dynamicTemplateData} />);
+		const html = await render(
+			<Component
+				{...(dynamicTemplateData as any)}
+				code={dynamicTemplateData.verificationCode}
+				type="register"
+			/>,
+		);
 		return { text, html };
 	}
 	if (template === "resetPassword") {
@@ -111,8 +117,9 @@ export const sendEmail = async (args: EmailArgs) => {
 	}
 	const { email, sender, subject, template } = args;
 	const emailTemplate = emailTemplates[template];
+	console.log("emailTemplate", emailTemplate);
 	const { html, text } = await getEmailHTML(args);
-	console.log("Email HTML:", html);
+	console.log(args);
 	const params: SendEmailCommandInput = {
 		Source: `${sender.name} <${sender.email}>`,
 		Destination: { ToAddresses: [email] },

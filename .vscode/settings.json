@@ -5,11 +5,14 @@
 		"bullmq",
 		"deepmerge",
 		"depcruise",
+		"dpage",
 		"Dynamoose",
 		"Fastify",
 		"knip",
 		"openapi",
+		"pgadmin",
 		"pkce",
+		"rediscommander",
 		"sendgrid"
 	],
 	"eslint.workingDirectories": ["./src"]

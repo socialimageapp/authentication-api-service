@@ -1,7 +1,3 @@
-/**
- * Copyright (c) 2020-2024, Social Image Ltd. All rights reserved.
- */
-
 import {
 	RegisterPostPayloadSchema,
 	RegisterResultSchema,
@@ -126,7 +122,6 @@ const registerRoutes: FastifyPluginAsyncZod = async function (fastify) {
 					},
 				});
 			}
-
 			const hashedPassword = await hashPassword(password);
 			const newUser = await authDatabase
 				.insert(users)

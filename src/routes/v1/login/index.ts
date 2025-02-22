@@ -11,6 +11,7 @@ import { FastifyPluginAsyncZod } from "fastify-type-provider-zod";
 import { authDatabase } from "src/configs/db.js";
 import AppError from "src/utils/errors/AppError.js";
 import bcrypt from "bcrypt";
+import { hashPassword } from "../register/index.js";
 
 const loginRoutes: FastifyPluginAsyncZod = async function (fastify) {
 	fastify.post("/", {
@@ -23,16 +24,24 @@ const loginRoutes: FastifyPluginAsyncZod = async function (fastify) {
 		},
 		handler: async (request, reply) => {
 			const { email, password } = request.body;
-
+			console.log("email", email);
+			console.log("password", password);
 			const user = await authDatabase.query.users.findFirst({
 				where: (users, { eq }) => eq(users.email, email),
 			});
 
 			// Dummy hash to prevent timing attacks
+	
 			const dummyHash = "$2b$10$" + "X".repeat(53);
 			const passwordMatch = !user
 				? await bcrypt.compare(password, dummyHash)
 				: await bcrypt.compare(password, user.password);
+
+			console.log("user.password", user?.password);
+			const hashedPassword = await hashPassword(password);
+			console.log("hashedPassword", hashedPassword);
+			console.log("passwordMatch", passwordMatch);
+			console.log("user", user);
 
 			if (!user || !passwordMatch) {
 				throw new AppError(

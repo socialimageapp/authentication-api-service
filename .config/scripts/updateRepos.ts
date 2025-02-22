@@ -66,6 +66,7 @@ const updateSubmoduleAndInstall = async () => {
 
 	const updateRepo = (repoPath: string) => {
 		console.log(`Updating submodule in repository: ${repoPath}`);
+		runCommand(`git checkout -- .`, path.join(repoPath, submodulePath));
 		runCommand(`git submodule update --init --recursive`, repoPath);
 		runCommand(`git fetch origin`, path.join(repoPath, submodulePath));
 		runCommand(`git checkout ${commitHash}`, path.join(repoPath, submodulePath));
