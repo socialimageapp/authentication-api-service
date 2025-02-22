@@ -117,14 +117,18 @@ const loginRoutes: FastifyPluginAsyncZod = async function (fastify) {
 					result: { token: authToken, user: userInfo },
 				});
 			} catch (error) {
-				if (error instanceof Error && 'code' in error && error.code === '23505') {
+				if (error instanceof Error && "code" in error && error.code === "23505") {
 					// Handle race condition where user was created between our check and insert
 					const existingUser = (await authDatabase.query.users.findFirst({
 						where: (users, { eq }) => eq(users.email, userInfo.email),
 					})) as unknown as User;
 
 					const authToken = fastify.jwt.sign(
-						{ sub: existingUser.id, email: existingUser, role: existingUser.userType },
+						{
+							sub: existingUser.id,
+							email: existingUser,
+							role: existingUser.userType,
+						},
 						{ expiresIn: "1h" },
 					);
 					return reply.send({

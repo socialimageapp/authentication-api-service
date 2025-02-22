@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { SES, SendEmailCommandInput } from "@aws-sdk/client-ses";
 import { render } from "@react-email/components";
 import { z } from "zod";

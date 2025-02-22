@@ -33,6 +33,6 @@ const meRoutes: FastifyPluginAsyncZod = async function (fastify) {
 			return reply.send({ result: userWithoutPassword as unknown as User });
 		},
 	});
-};	
+};
 
 export default meRoutes;

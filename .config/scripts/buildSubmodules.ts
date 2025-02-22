@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { execSync } from "child_process";
 import { readdirSync, readFileSync, existsSync } from "fs";
 import { rm, cp } from "fs/promises";

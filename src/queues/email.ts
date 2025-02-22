@@ -17,7 +17,7 @@ export const emailWorker = new Worker<EmailArgs>(
 	async ({ data }) => sendEmail(data),
 	{ connection, limiter: { max: 14, duration: 1000 } },
 );
+
 emailWorker.on("error", (err) => {
-	// eslint-disable-next-line no-console
 	console.error(err);
 });

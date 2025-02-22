@@ -13,6 +13,7 @@ const PORT = process.env.PORT || "3000";
 const DOCS_PATH = config.docsPath ?? "/documentation";
 
 const __filename = fileURLToPath(import.meta.url);
+
 const __dirname = path.dirname(__filename);
 
 const fastify = await setupFastify(Fastify({ logger: true }));
@@ -25,10 +26,6 @@ await fastify.register(autoLoad, {
 	dir: join(__dirname, "routes/v1"),
 	options: { prefix: config.basePath.v1 },
 	ignoreFilter: (path) => path.endsWith(".test.ts"),
-
-	// dirNameRoutePrefix(folderParent, folderName) {
-	// 	return folderName.startsWith("_") ? `{${folderName.split("_")[1]}}` : folderName;
-	// },
 });
 await fastify.ready();
 fastify.listen({ port: Number(PORT), host: "0.0.0.0" }, (err, address) => {
@@ -36,14 +33,13 @@ fastify.listen({ port: Number(PORT), host: "0.0.0.0" }, (err, address) => {
 		fastify.log.error(err);
 		process.exit(1);
 	}
-	//eslint-disable-next-line no-console
+
 	console.log(`Server is running on ${address}`);
 });
-// eslint-disable-next-line no-console
+
 console.log(`Documentation running at http://localhost:${PORT}${DOCS_PATH}`);
 
 // Handle graceful shutdown
 process.on("exit", function () {
-	// eslint-disable-next-line no-console
 	console.log("Server is shutting down");
 });

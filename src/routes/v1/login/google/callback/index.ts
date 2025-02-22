@@ -75,7 +75,7 @@ const loginRoutes: FastifyPluginAsyncZod = async function (fastify) {
 					.redirect(`${process.env.FRONTEND_URL as string}/`);
 			} else {
 				const hashedPassword = await hashPassword(
-					crypto.randomBytes(length).toString("hex"),
+					crypto.randomBytes(16).toString("hex"),
 				);
 				const newUser = await authDatabase
 					.insert(users)

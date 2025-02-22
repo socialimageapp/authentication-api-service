@@ -4,7 +4,7 @@ import {
 	organizationRoles,
 	organizationKeys,
 	organizationUserRoles,
-    User,
+	User,
 } from "@adventurai/shared-types";
 import { authDatabase } from "src/configs/db.js";
 

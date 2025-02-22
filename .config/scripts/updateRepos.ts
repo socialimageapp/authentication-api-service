@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { execSync } from "child_process";
 import path from "path";
 import yargs from "yargs";
@@ -26,7 +25,6 @@ const argv = yargs(process.argv.slice(2))
 		alias: "c",
 		describe: "Commit hash to checkout (overridden if --submoduleFolder is provided)",
 		type: "string",
-		// Not required if submoduleFolder is provided.
 		demandOption: false,
 	})
 	.option("submoduleFolder", {
@@ -79,5 +77,7 @@ const updateSubmoduleAndInstall = async () => {
 	console.log("Submodule update and installation completed.");
 };
 
+// Example command to run the script
+// Command: node updateRepos.js --repos repo1,repo2 --commit abc123
 // Run the script
 updateSubmoduleAndInstall();

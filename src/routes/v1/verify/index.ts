@@ -29,10 +29,12 @@ async function setupUserAccount(user: User, fastify: FastifyInstance) {
 		})
 		.returning();
 	fastify.log.info(`Created organization ${org[0].name} for user ${user.email}`);
-	await authDatabase.insert(organizationUsers).values([{
-		organizationId: org[0].id,
-		userId: user.id
-	}]);
+	await authDatabase.insert(organizationUsers).values([
+		{
+			organizationId: org[0].id,
+			userId: user.id,
+		},
+	]);
 }
 
 const verifyUser = async (token: string, fastify: FastifyInstance) => {
