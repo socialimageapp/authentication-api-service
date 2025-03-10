@@ -46,7 +46,6 @@ export const setupFastify = async (fastify: FastifyInstance) => {
 	await fastify.register(cookie, {});
 	await fastify.register(fastifyJwt, {
 		secret: process.env.JWT_SECRET || "secr3t",
-		cookie: { cookieName: "accessToken", signed: false },
 	});
 	await fastify.register(fastifyStatic, {
 		root: path.join(__dirname, "../public"),
@@ -101,7 +100,7 @@ export const setupFastify = async (fastify: FastifyInstance) => {
 	});
 	await fastify.register(fastifyCors, {
 		origin: "*",
-		methods: ["GET", "POST", "PUT", "DELETE"],
+		methods: ["GET", "POST", "PUT", "PATCH", "OPTIONS", "DELETE"],
 		allowedHeaders: ["Content-Type", "Authorization"],
 		credentials: true,
 	});
