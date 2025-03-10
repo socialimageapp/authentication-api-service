@@ -1,6 +1,6 @@
 [submodule "lib/ast"]
 	path = lib/ast
-	url = git@github.com:socialimageapp/adventurai-shared-types.git
+	url = ../adventurai-shared-types.git
 [submodule "lib/adb"]
 	path = lib/adb
-	url = git@github.com:socialimageapp/adventur-database.git
+	url = ../adventur-database.git
