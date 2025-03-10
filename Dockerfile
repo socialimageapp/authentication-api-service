@@ -1,29 +1,56 @@
 # Use an official Node.js runtime as the base image
-FROM node:22
+FROM node:22 AS builder
 
-# Set the working directory in the container
-WORKDIR /usr/src/app
+# Set working directory
+WORKDIR /app
 
-# Copy package.json and pnpm-lock.yaml to the working directory
-COPY package.json pnpm-lock.yaml ./
+# Copy package.json and pnpm-lock.yaml (if you have one)
+COPY package.json ./
+COPY pnpm-lock.yaml ./
 
 # Install pnpm globally
-RUN corepack enable && corepack prepare pnpm@9.12.0 --activate
+RUN npm install -g pnpm ts-patch
 
-# Install dependencies
-RUN pnpm install
+# Copy the config directory properly
+COPY .config ./.config
 
-# Copy the entire project (excluding files in .dockerignore)
+# Copy the rest of your application code
 COPY . .
 
-# Clone and update submodules
-RUN git submodule update --init --recursive
+# Install dependencies (including devDependencies for build)
+RUN pnpm install
 
-# Run the build script (includes building submodules and TypeScript)
+# Build the app (compiles TypeScript to JavaScript)
 RUN pnpm run build
 
-# Expose the application's port
+# Production stage
+FROM node:22 
+
+# Install build dependencies for bcrypt
+RUN apt-get update && apt-get install -y \
+    python3 \
+    make \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# Copy built files and production dependencies
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/package.json ./
+COPY --from=builder /app/public ./public
+COPY --from=builder /app/.config ./.config
+COPY --from=builder /app/pnpm-lock.yaml ./
+COPY --from=builder /app/node_modules/@adventurai/shared-types ./node_modules/@adventurai/shared-types
+
+# Install pnpm globally
+RUN npm install -g pnpm tsx
+
+# Install only production dependencies
+RUN pnpm install --prod --ignore-scripts
+
+# Expose the port your Fastify app will run on (default 3000 unless overridden)
 EXPOSE 7071
 
-# Command to start the application
-CMD ["pnpm", "start"]
+# Start the app
+CMD ["node", "dist/index.js"]

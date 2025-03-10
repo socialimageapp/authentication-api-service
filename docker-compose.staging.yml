@@ -46,6 +46,34 @@ services:
         depends_on:
             - redis
 
+    fastify-auth:
+        build:
+            context: . # Use the current directory (where Dockerfile and package.json are)
+            dockerfile: Dockerfile
+        container_name: fastify_auth_container
+        restart: always
+        environment:
+            # Database connection
+            DB_HOST: postgres_container
+            DB_PORT: 5432
+            DB_USER: postgres
+            DB_PASSWORD: ${SERVICE_PASSWORD_POSTGRES_STAGING}
+            DB_NAME: auth_db # Adjust if your app uses a specific database name
+            # Redis connection
+            REDIS_HOST: redis_container
+            REDIS_PORT: 6379
+            # JWT or other secrets
+            JWT_SECRET: ${JWT_SECRET_STAGING} # Define this in your .env
+            # App port (if not default 3000)
+            PORT: ${SERVICE_PORT_FASTIFY_STAGING:-3000}
+        ports:
+            - "${SERVICE_PORT_FASTIFY_STAGING:-3000}:3000"
+        depends_on:
+            - postgres
+            - redis
+        volumes:
+            - ./dist:/app/dist # Optional: for live updates during development
+
 volumes:
     postgres_data:
     pgadmin_data:
