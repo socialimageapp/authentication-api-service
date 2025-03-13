@@ -36,10 +36,10 @@ fastify.listen({ port: Number(PORT), host: "0.0.0.0" }, (err, address) => {
 
 	console.log(`Server is running on ${address}`);
 });
-
 console.log(`Documentation running at http://localhost:${PORT}${DOCS_PATH}`);
 
 // Handle graceful shutdown
 process.on("exit", function () {
 	console.log("Server is shutting down");
 });
+	

@@ -1,7 +1,7 @@
 # Use an official Node.js runtime as the base image
 FROM node:22 AS builder
 
-# Set working directory
+# Set working directory in the container
 WORKDIR /app
 
 # Copy package.json and pnpm-lock.yaml (if you have one)
@@ -14,14 +14,18 @@ RUN npm install -g pnpm ts-patch
 # Copy the config directory properly
 COPY .config ./.config
 
-# Copy the rest of your application code
-COPY . .
+# Copy the rest of your application code but exclude node_modules
+COPY . . 
 
 # Install dependencies (including devDependencies for build)
 RUN pnpm install
 
 # Build the app (compiles TypeScript to JavaScript)
+RUN pnpm tsPatch
 RUN pnpm run build
+
+RUN echo "Building the app"
+RUN ls -la /app || echo "dist folder not found"
 
 # Production stage
 FROM node:22 
@@ -37,17 +41,21 @@ WORKDIR /app
 
 # Copy built files and production dependencies
 COPY --from=builder /app/dist ./dist
+RUN ls -la /app/dist || echo "dist folder empty or missing"
 COPY --from=builder /app/package.json ./
 COPY --from=builder /app/public ./public
+COPY --from=builder /app/favicon.ico ./favicon.ico
 COPY --from=builder /app/.config ./.config
 COPY --from=builder /app/pnpm-lock.yaml ./
+
 COPY --from=builder /app/node_modules/@adventurai/shared-types ./node_modules/@adventurai/shared-types
 
 # Install pnpm globally
-RUN npm install -g pnpm tsx
+RUN npm install -g pnpm tsx node-pre-gyp
 
 # Install only production dependencies
-RUN pnpm install --prod --ignore-scripts
+RUN pnpm install --prod
+RUN cd node_modules/bcrypt && node-pre-gyp install --fallback-to-build
 
 # Expose the port your Fastify app will run on (default 3000 unless overridden)
 EXPOSE 7071

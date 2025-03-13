@@ -14,7 +14,8 @@
 		"pgadmin",
 		"pkce",
 		"rediscommander",
-		"sendgrid"
+		"sendgrid",
+		"upsub"
 	],
 	"eslint.workingDirectories": ["./src"]
 }
