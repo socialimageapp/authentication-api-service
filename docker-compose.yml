@@ -2,6 +2,7 @@ services:
     postgres:
         image: postgres:latest
         container_name: postgres_container
+        hostname: postgres
         restart: always
         environment:
             POSTGRES_USER: postgres
@@ -57,26 +58,30 @@ services:
         networks:
             - my-net
         env_file:
-            - .config/environments/.env.staging
+            - .config/environments/.env.local
         build:
             context: . # Use the current directory (where Dockerfile and package.json are)
             dockerfile: Dockerfile
         container_name: fastify_auth_container
         restart: always
         environment:
-            # Database connection
-            DB_HOST: postgres_container
-            DB_PORT: 5432
-            DB_USER: postgres
-            DB_PASSWORD: password
-            DB_NAME: auth_db # Adjust if your app uses a specific database name
-            # Redis connection
-            REDIS_HOST: redis
-            REDIS_PORT: 6379
-            # JWT or other secrets
-            # JWT_SECRET: ${JWT_SECRET_STAGING} # Define this in your .env
-            # App port (if not default 3000)
             PORT: 7071
+            AUTH_DATABASE_URL: postgresql://postgres:password@postgres:5432/auth
+            GENERATE_DATABASE_URL: postgresql://postgres:password@postgres:5432/generate
+            BILLING_DATABASE_URL: postgresql://postgres:password@postgres:5432/billing
+            # SENDGRID_API_KEY: ${SENDGRID_API_KEY}
+            # AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+            # AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+            # AWS_REGION: ${AWS_REGION}
+            # AWS_BUCKET_NAME: ${AWS_BUCKET_NAME}
+            # AWS_BUCKET_REGION: ${AWS_BUCKET_REGION}
+            GOOGLE_OAUTH_CLIENT_ID: 319099825360-85j9mqfbia25m3mlng0eok5gqhd7eo4t.apps.googleusercontent.com
+            # GOOGLE_OAUTH_CLIENT_SECRET: ${GOOGLE_OAUTH_CLIENT_SECRET}
+            GOOGLE_OAUTH_CLIENT_REDIRECT_URI: https://localhost:3000/auth/callback
+            REDIS_HOST: redis_container
+            REDIS_PORT: 6379
+            JWT_SECRET: 9LGI8l52AFJ3MU9zr3EG+eJhCnH/Bh+FDYTPRiuRbd3VRZU+MPMFieJGzaXKR4CUPQbIIMhRmLijjTfOu394pA==
+            FRONTEND_URL: http://localhost:3000
         ports:
             - "7071:7071"
         depends_on:

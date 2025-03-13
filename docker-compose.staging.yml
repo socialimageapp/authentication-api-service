@@ -33,7 +33,6 @@ services:
             - "${SERVICE_PORT_REDIS_STAGING}:6379"
         volumes:
             - redis_data:/data
-
     redis-commander:
         image: rediscommander/redis-commander:latest
         container_name: redis_commander_container
@@ -46,33 +45,37 @@ services:
         depends_on:
             - redis
 
-    fastify-auth:
+    authService:
         build:
             context: . # Use the current directory (where Dockerfile and package.json are)
             dockerfile: Dockerfile
         container_name: fastify_auth_container
         restart: always
         environment:
-            # Database connection
-            DB_HOST: postgres_container
-            DB_PORT: 5432
-            DB_USER: postgres
-            DB_PASSWORD: ${SERVICE_PASSWORD_POSTGRES_STAGING}
-            DB_NAME: auth_db # Adjust if your app uses a specific database name
-            # Redis connection
+            PORT: ${SERVICE_PORT_FASTIFY_STAGING:-7071}
+            AUTH_DATABASE_URL: postgresql://postgres:${SERVICE_PASSWORD_POSTGRES_STAGING}@${SERVICE_HOST_POSTGRES_STAGING}:${SERVICE_PORT_POSTGRES_STAGING}/auth
+            GENERATE_DATABASE_URL: postgresql://postgres:${SERVICE_PASSWORD_POSTGRES_STAGING}@${SERVICE_HOST_POSTGRES_STAGING}:${SERVICE_PORT_POSTGRES_STAGING}/generate
+            BILLING_DATABASE_URL: postgresql://postgres:${SERVICE_PASSWORD_POSTGRES_STAGING}@${SERVICE_HOST_POSTGRES_STAGING}:${SERVICE_PORT_POSTGRES_STAGING}/billing
+            SENDGRID_API_KEY: ${SENDGRID_API_KEY_STAGING}
+            AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID_STAGING}
+            AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY_STAGING}
+            AWS_REGION: ${AWS_REGION_STAGING}
+            AWS_BUCKET_NAME: ${AWS_BUCKET_NAME_STAGING}
+            AWS_BUCKET_REGION: ${AWS_BUCKET_REGION_STAGING}
+            GOOGLE_OAUTH_CLIENT_ID: ${GOOGLE_OAUTH_CLIENT_ID_STAGING}
+            GOOGLE_OAUTH_CLIENT_SECRET: ${GOOGLE_OAUTH_CLIENT_SECRET_STAGING}
+            GOOGLE_OAUTH_CLIENT_REDIRECT_URI: ${GOOGLE_OAUTH_CLIENT_REDIRECT_URI_STAGING}
             REDIS_HOST: redis_container
             REDIS_PORT: 6379
-            # JWT or other secrets
-            JWT_SECRET: ${JWT_SECRET_STAGING} # Define this in your .env
-            # App port (if not default 3000)
-            PORT: ${SERVICE_PORT_FASTIFY_STAGING:-3000}
+            JWT_SECRET: ${JWT_SECRET_STAGING}
+            FRONTEND_URL: ${FRONTEND_URL_STAGING}
         ports:
-            - "${SERVICE_PORT_FASTIFY_STAGING:-3000}:3000"
+            - "${SERVICE_PORT_FASTIFY_STAGING:-7071}:7071"
         depends_on:
             - postgres
             - redis
-        volumes:
-            - ./dist:/app/dist # Optional: for live updates during development
+        # volumes:
+        #     - ./dist:/app/dist
 
 volumes:
     postgres_data:
