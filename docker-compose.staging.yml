@@ -45,7 +45,7 @@ services:
         depends_on:
             - redis
 
-    authService:
+    auth-service:
         build:
             context: . # Use the current directory (where Dockerfile and package.json are)
             dockerfile: Dockerfile

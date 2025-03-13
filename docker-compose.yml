@@ -54,7 +54,7 @@ services:
             - my-net
         depends_on:
             - redis
-    fastify-auth:
+    auth-service:
         networks:
             - my-net
         env_file:
