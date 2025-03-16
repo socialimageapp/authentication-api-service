@@ -1,6 +1,4 @@
-/**
- * Copyright (c) 2020-2024, Social Image Ltd. All rights reserved.
- */
+
 import Fastify from "fastify";
 import path, { join } from "path";
 import fastifyFavicon from "fastify-favicon";

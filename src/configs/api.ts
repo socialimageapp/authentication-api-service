@@ -1,7 +1,3 @@
-/**
- * Copyright (c) 2020-2024, Social Image Ltd. All rights reserved.
- */
-
 type BusinessConfig = {
 	name: string;
 	website: string;
@@ -20,7 +16,12 @@ interface ApiConfig {
 	business: BusinessConfig;
 }
 
-const config: ApiConfig = {
+export const environments = ["local", "staging", "production"] as const;
+export type Environment = (typeof environments)[number];
+
+const apiBasePath = "/api/auth/v1";
+
+const config = {
 	business: {
 		email: "contact@adventur.ai",
 		name: "AdVentur.ai",
@@ -30,7 +31,7 @@ const config: ApiConfig = {
 				"https://res.cloudinary.com/social-image-app/image/upload/v1729945562/logo_g3dmcl.png",
 		},
 	},
-	docsPath: "/docs",
+	docsPath: `${apiBasePath}/docs`,
 	version: "1.0.0",
 	allowedOrigins: [
 		process.env.FRONTEND_URL ?? "http://localhost:3000",
@@ -39,12 +40,12 @@ const config: ApiConfig = {
 		"http://localhost:3000",
 		"http://127.0.0.1:3000",
 		"https://app.adventur.ai",
-		"https://develop.app.adventur.ai",
+		"https://staging.app.adventur.ai",
 	],
-	basePath: { v1: "/api/auth/v1" },
+	basePath: { v1: apiBasePath },
 	description:
 		"AdVentur.ai Auth Service API. This service is responsible for managing user authentication and authorization.",
 	appName: "AdVentur.ai",
-} as const;
+} as const satisfies ApiConfig;
 
 export default config;

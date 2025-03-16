@@ -1,57 +1,29 @@
+version: "3.8"
+
 services:
     postgres:
-        image: postgres:latest
-        container_name: postgres_container
-        restart: always
         environment:
-            POSTGRES_USER: postgres
             POSTGRES_PASSWORD: ${SERVICE_PASSWORD_POSTGRES_STAGING}
         ports:
             - "${SERVICE_PORT_POSTGRES_STAGING}:5432"
-        volumes:
-            - postgres_data:/var/lib/postgresql/data
+
     pgadmin:
-        image: dpage/pgadmin4:latest
-        container_name: pgadmin_container
-        restart: always
         environment:
-            PGADMIN_DEFAULT_EMAIL: admin@admin.com
             PGADMIN_DEFAULT_PASSWORD: ${SERVICE_PASSWORD_PGADMIN_STAGING}
         ports:
             - "${SERVICE_PORT_PGADMIN_STAGING}:80"
-        depends_on:
-            - postgres
-        volumes:
-            - pgadmin_data:/var/lib/pgadmin
 
     redis:
-        image: redis:latest
-        container_name: redis_container
-        restart: always
-        hostname: redis
         ports:
             - "${SERVICE_PORT_REDIS_STAGING}:6379"
-        volumes:
-            - redis_data:/data
+
     redis-commander:
-        image: rediscommander/redis-commander:latest
-        container_name: redis_commander_container
-        hostname: redis-commander
-        restart: always
-        environment:
-            REDIS_HOSTS: redis_container
         ports:
             - "${SERVICE_PORT_REDIS_COMMANDER_STAGING}:8081"
-        depends_on:
-            - redis
 
     auth-service:
-        build:
-            context: . # Use the current directory (where Dockerfile and package.json are)
-            dockerfile: Dockerfile
-        container_name: fastify_auth_container
-        restart: always
         environment:
+            SERVICE_FQDN_AUTH_SERVICE_7071: /api/auth/v1
             PORT: ${SERVICE_PORT_FASTIFY_STAGING:-7071}
             AUTH_DATABASE_URL: postgresql://postgres:${SERVICE_PASSWORD_POSTGRES_STAGING}@${SERVICE_HOST_POSTGRES_STAGING}:${SERVICE_PORT_POSTGRES_STAGING}/auth
             GENERATE_DATABASE_URL: postgresql://postgres:${SERVICE_PASSWORD_POSTGRES_STAGING}@${SERVICE_HOST_POSTGRES_STAGING}:${SERVICE_PORT_POSTGRES_STAGING}/generate
@@ -65,19 +37,8 @@ services:
             GOOGLE_OAUTH_CLIENT_ID: ${GOOGLE_OAUTH_CLIENT_ID_STAGING}
             GOOGLE_OAUTH_CLIENT_SECRET: ${GOOGLE_OAUTH_CLIENT_SECRET_STAGING}
             GOOGLE_OAUTH_CLIENT_REDIRECT_URI: ${GOOGLE_OAUTH_CLIENT_REDIRECT_URI_STAGING}
-            REDIS_HOST: redis_container
-            REDIS_PORT: 6379
             JWT_SECRET: ${JWT_SECRET_STAGING}
             FRONTEND_URL: ${FRONTEND_URL_STAGING}
+            MODE: staging
         ports:
             - "${SERVICE_PORT_FASTIFY_STAGING:-7071}:7071"
-        depends_on:
-            - postgres
-            - redis
-        # volumes:
-        #     - ./dist:/app/dist
-
-volumes:
-    postgres_data:
-    pgadmin_data:
-    redis_data:

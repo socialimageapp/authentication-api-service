@@ -1,18 +1,18 @@
+version: "3.8"
+
 services:
     postgres:
         image: postgres:latest
         container_name: postgres_container
-        hostname: postgres
         restart: always
         environment:
             POSTGRES_USER: postgres
             POSTGRES_PASSWORD: password
-        networks:
-            - my-net
         ports:
             - "5432:5432"
         volumes:
             - postgres_data:/var/lib/postgresql/data
+
     pgadmin:
         image: dpage/pgadmin4:latest
         container_name: pgadmin_container
@@ -20,8 +20,6 @@ services:
         environment:
             PGADMIN_DEFAULT_EMAIL: admin@admin.com
             PGADMIN_DEFAULT_PASSWORD: admin
-        networks:
-            - my-net
         ports:
             - "5050:80"
         depends_on:
@@ -33,34 +31,25 @@ services:
         image: redis:latest
         container_name: redis_container
         restart: always
-        hostname: redis
         ports:
             - "6379:6379"
         volumes:
             - redis_data:/data
-        networks:
-            - my-net
 
     redis-commander:
         image: rediscommander/redis-commander:latest
         container_name: redis_commander_container
-        hostname: redis-commander
         restart: always
         environment:
             REDIS_HOSTS: redis_container
         ports:
             - "8081:8081"
-        networks:
-            - my-net
         depends_on:
             - redis
+
     auth-service:
-        networks:
-            - my-net
-        env_file:
-            - .config/environments/.env.local
         build:
-            context: . # Use the current directory (where Dockerfile and package.json are)
+            context: .
             dockerfile: Dockerfile
         container_name: fastify_auth_container
         restart: always
@@ -69,14 +58,7 @@ services:
             AUTH_DATABASE_URL: postgresql://postgres:password@postgres:5432/auth
             GENERATE_DATABASE_URL: postgresql://postgres:password@postgres:5432/generate
             BILLING_DATABASE_URL: postgresql://postgres:password@postgres:5432/billing
-            # SENDGRID_API_KEY: ${SENDGRID_API_KEY}
-            # AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-            # AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-            # AWS_REGION: ${AWS_REGION}
-            # AWS_BUCKET_NAME: ${AWS_BUCKET_NAME}
-            # AWS_BUCKET_REGION: ${AWS_BUCKET_REGION}
             GOOGLE_OAUTH_CLIENT_ID: 319099825360-85j9mqfbia25m3mlng0eok5gqhd7eo4t.apps.googleusercontent.com
-            # GOOGLE_OAUTH_CLIENT_SECRET: ${GOOGLE_OAUTH_CLIENT_SECRET}
             GOOGLE_OAUTH_CLIENT_REDIRECT_URI: https://localhost:3000/auth/callback
             REDIS_HOST: redis_container
             REDIS_PORT: 6379
@@ -87,12 +69,8 @@ services:
         depends_on:
             - postgres
             - redis
-        # volumes:
-        #     - ./dist:/app/dist # Optional: for live updates during development
 
 volumes:
     postgres_data:
     pgadmin_data:
     redis_data:
-networks:
-    my-net:
