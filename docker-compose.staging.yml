@@ -40,7 +40,7 @@ services:
         container_name: redis_commander_container
         restart: always
         environment:
-            REDIS_HOSTS: redis_container
+            REDIS_HOSTS: redis
         ports:
             - "${SERVICE_PORT_REDIS_COMMANDER_STAGING}:8081"
         depends_on:
