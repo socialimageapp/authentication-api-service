@@ -12,7 +12,6 @@ services:
             - "${SERVICE_PORT_POSTGRES_STAGING}:5432"
         volumes:
             - postgres_data:/var/lib/postgresql/data
-
     pgadmin:
         image: dpage/pgadmin4:latest
         container_name: pgadmin_container
@@ -72,7 +71,7 @@ services:
             FRONTEND_URL: ${FRONTEND_URL_STAGING}
             MODE: staging
             REDIS_HOST: redis_container
-            REDIS_PORT: 6379
+            REDIS_PORT: ${SERVICE_PORT_REDIS_STAGING:-6379}
         ports:
             - "${SERVICE_PORT_FASTIFY_STAGING:-7071}:7071"
         depends_on:
