@@ -28,8 +28,6 @@ services:
         image: redis:latest
         container_name: redis_container
         restart: always
-        ports:
-            - "${SERVICE_PORT_REDIS_STAGING}:6379"
         volumes:
             - redis_data:/data
 
@@ -39,8 +37,12 @@ services:
         restart: always
         environment:
             REDIS_HOSTS: redis
+            HTTP_USER: ${SERVICE_USERNAME_REDIS_COMMANDER_STAGING:-admin}
+            HTTP_PASSWORD: ${SERVICE_PASSWORD_REDIS_COMMANDER_STAGING}
+            HTTP_AUTH_ENABLED: "true"
+            HTTPS_PORT: 8443
         ports:
-            - "${SERVICE_PORT_REDIS_COMMANDER_STAGING}:8081"
+            - "${SERVICE_PORT_REDIS_COMMANDER_STAGING}:8443"
         depends_on:
             - redis
 
@@ -68,8 +70,8 @@ services:
             JWT_SECRET: ${JWT_SECRET_STAGING}
             FRONTEND_URL: ${FRONTEND_URL_STAGING}
             MODE: staging
-            REDIS_HOST: ${REDIS_HOST_STAGING:-redis}
-            REDIS_PORT: ${SERVICE_PORT_REDIS_STAGING:-6379}
+            REDIS_HOST: redis
+            REDIS_PORT: 6379
         ports:
             - "${SERVICE_PORT_FASTIFY_STAGING:-7071}:7071"
         depends_on:
