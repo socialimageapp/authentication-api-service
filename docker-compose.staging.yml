@@ -6,8 +6,8 @@ services:
         environment:
             POSTGRES_USER: postgres
             POSTGRES_PASSWORD: ${SERVICE_PASSWORD_POSTGRES_STAGING}
-        ports:
-            - "${SERVICE_PORT_POSTGRES_STAGING}:5432"
+        # ports:
+        #     - "${SERVICE_PORT_POSTGRES_STAGING}:5432"
         volumes:
             - postgres_data:/var/lib/postgresql/data
     pgadmin:
@@ -55,9 +55,9 @@ services:
         environment:
             SERVICE_FQDN_AUTH_SERVICE_7071: /api/auth/v1
             PORT: ${SERVICE_PORT_FASTIFY_STAGING:-7071}
-            AUTH_DATABASE_URL: postgresql://postgres:${SERVICE_PASSWORD_POSTGRES_STAGING}@${SERVICE_HOST_POSTGRES_STAGING}:${SERVICE_PORT_POSTGRES_STAGING}/auth
-            GENERATE_DATABASE_URL: postgresql://postgres:${SERVICE_PASSWORD_POSTGRES_STAGING}@${SERVICE_HOST_POSTGRES_STAGING}:${SERVICE_PORT_POSTGRES_STAGING}/generate
-            BILLING_DATABASE_URL: postgresql://postgres:${SERVICE_PASSWORD_POSTGRES_STAGING}@${SERVICE_HOST_POSTGRES_STAGING}:${SERVICE_PORT_POSTGRES_STAGING}/billing
+            AUTH_DATABASE_URL: postgresql://postgres:${SERVICE_PASSWORD_POSTGRES_STAGING}@postgres:5432/auth
+            GENERATE_DATABASE_URL: postgresql://postgres:${SERVICE_PASSWORD_POSTGRES_STAGING}@postgres:5432/generate
+            BILLING_DATABASE_URL: postgresql://postgres:${SERVICE_PASSWORD_POSTGRES_STAGING}@postgres:5432/billing
             SENDGRID_API_KEY: ${SENDGRID_API_KEY_STAGING}
             AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID_STAGING}
             AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY_STAGING}
