@@ -10,6 +10,28 @@ services:
     #     volumes:
     #         - postgres_data:/var/lib/postgresql/data
     #         - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+
+    # redis:
+    #     image: redis:latest
+    #     container_name: redis_container
+    #     restart: always
+    #     volumes:
+    #         - redis_data:/data
+
+    # redis-commander:
+    #     image: rediscommander/redis-commander:latest
+    #     container_name: redis_commander_container
+    #     restart: always
+    #     environment:
+    #         REDIS_HOSTS: redis
+    #         HTTP_USER: ${SERVICE_USERNAME_REDIS_COMMANDER_STAGING:-admin}
+    #         HTTP_PASSWORD: ${SERVICE_PASSWORD_REDIS_COMMANDER_STAGING}
+    #         HTTP_AUTH_ENABLED: "true"
+    #         HTTPS_PORT: 8443
+    #     ports:
+    #         - "${SERVICE_PORT_REDIS_COMMANDER_STAGING}:8443"
+    #     depends_on:
+    #         - redis
     pgadmin:
         image: dpage/pgadmin4:latest
         container_name: pgadmin_container
@@ -23,29 +45,6 @@ services:
         #     - postgres
         volumes:
             - pgadmin_data:/var/lib/pgadmin
-
-    redis:
-        image: redis:latest
-        container_name: redis_container
-        restart: always
-        volumes:
-            - redis_data:/data
-
-    redis-commander:
-        image: rediscommander/redis-commander:latest
-        container_name: redis_commander_container
-        restart: always
-        environment:
-            REDIS_HOSTS: redis
-            HTTP_USER: ${SERVICE_USERNAME_REDIS_COMMANDER_STAGING:-admin}
-            HTTP_PASSWORD: ${SERVICE_PASSWORD_REDIS_COMMANDER_STAGING}
-            HTTP_AUTH_ENABLED: "true"
-            HTTPS_PORT: 8443
-        ports:
-            - "${SERVICE_PORT_REDIS_COMMANDER_STAGING}:8443"
-        depends_on:
-            - redis
-
     auth-service:
         build:
             context: .
@@ -70,15 +69,14 @@ services:
             JWT_SECRET: ${JWT_SECRET_STAGING}
             FRONTEND_URL: ${FRONTEND_URL_STAGING}
             MODE: staging
-            REDIS_HOST: redis
-            REDIS_PORT: 6379
+            REDIS_HOST: ${SERVICE_HOST_REDIS_STAGING}
+            REDIS_PORT: ${SERVICE_PORT_REDIS_STAGING}
         ports:
             - "${SERVICE_PORT_FASTIFY_STAGING:-7071}:7071"
-        depends_on:
-            - postgres
-            - redis
-
-volumes:
-    postgres_data:
-    pgadmin_data:
-    redis_data:
+        # depends_on:
+        #     - postgres
+        #     - redis
+# volumes:
+#     postgres_data:
+#     pgadmin_data:
+#     redis_data:
