@@ -9,6 +9,7 @@
 		"dpage",
 		"Dynamoose",
 		"Fastify",
+		"initdb",
 		"knip",
 		"openapi",
 		"pgadmin",

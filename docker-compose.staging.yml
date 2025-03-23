@@ -6,10 +6,10 @@ services:
         environment:
             POSTGRES_USER: postgres
             POSTGRES_PASSWORD: ${SERVICE_PASSWORD_POSTGRES_STAGING}
-        # ports:
-        #     - "${SERVICE_PORT_POSTGRES_STAGING}:5432"
+
         volumes:
             - postgres_data:/var/lib/postgresql/data
+            - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     pgadmin:
         image: dpage/pgadmin4:latest
         container_name: pgadmin_container
