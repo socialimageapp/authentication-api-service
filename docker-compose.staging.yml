@@ -53,6 +53,12 @@ services:
             dockerfile: Dockerfile
         container_name: fastify_auth_container
         restart: always
+        healthcheck:
+            test: curl --fail http://localhost:${SERVICE_PORT_FASTIFY_STAGING:-7071}/api/auth/v1/health || exit 1
+            interval: 40s
+            timeout: 30s
+            retries: 3
+            start_period: 60s
         environment:
             SERVICE_FQDN_AUTH_SERVICE_7071: /api/auth/v1
             PORT: ${SERVICE_PORT_FASTIFY_STAGING:-7071}
