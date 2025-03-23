@@ -62,7 +62,8 @@ const meRoutes: FastifyPluginAsyncZod = async function (fastify) {
 				settings: request.body.settings,
 			}).where(eq(users.id, userId)).returning();
 
-			return reply.send({ result: UserSchema.parse(updatedUser[0]) });
+			const userWithoutPassword = UserSchema.omit({ password: true }).parse(updatedUser[0]);
+			return reply.send({ result: userWithoutPassword });
 		},
 	});
 };
