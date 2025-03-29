@@ -1,5 +1,6 @@
 {
 	"cSpell.words": [
+		"adventur",
 		"adventurai",
 		"autoload",
 		"bullmq",
@@ -8,12 +9,15 @@
 		"dpage",
 		"Dynamoose",
 		"Fastify",
+		"healthcheck",
+		"initdb",
 		"knip",
 		"openapi",
 		"pgadmin",
 		"pkce",
 		"rediscommander",
-		"sendgrid"
+		"sendgrid",
+		"upsub"
 	],
 	"eslint.workingDirectories": ["./src"]
 }

@@ -1,0 +1,82 @@
+services:
+    postgres:
+        image: postgres:latest
+        container_name: postgres_container
+        restart: always
+        environment:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: ${SERVICE_PASSWORD_POSTGRES_PRODUCTION}
+        ports:
+            - "${SERVICE_PORT_POSTGRES_PRODUCTION}:5432"
+        volumes:
+            - postgres_data:/var/lib/postgresql/data
+
+    pgadmin:
+        image: dpage/pgadmin4:latest
+        container_name: pgadmin_container
+        restart: always
+        environment:
+            PGADMIN_DEFAULT_EMAIL: admin@admin.com
+            PGADMIN_DEFAULT_PASSWORD: ${SERVICE_PASSWORD_PGADMIN_PRODUCTION}
+        ports:
+            - "${SERVICE_PORT_PGADMIN_PRODUCTION}:80"
+        depends_on:
+            - postgres
+        volumes:
+            - pgadmin_data:/var/lib/pgadmin
+
+    redis:
+        image: redis:latest
+        container_name: redis_container
+        restart: always
+        ports:
+            - "${SERVICE_PORT_REDIS_PRODUCTION}:6379"
+        volumes:
+            - redis_data:/data
+
+    redis-commander:
+        image: rediscommander/redis-commander:latest
+        container_name: redis_commander_container
+        restart: always
+        environment:
+            REDIS_HOSTS: redis_container
+        ports:
+            - "${SERVICE_PORT_REDIS_COMMANDER_PRODUCTION}:8081"
+        depends_on:
+            - redis
+
+    auth-service:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: fastify_auth_container
+        restart: always
+        environment:
+            SERVICE_FQDN_AUTH_SERVICE_8071: /api/auth/v1
+            PORT: ${SERVICE_PORT_FASTIFY_PRODUCTION:-8071}
+            AUTH_DATABASE_URL: postgresql://postgres:${SERVICE_PASSWORD_POSTGRES_PRODUCTION}@${SERVICE_HOST_POSTGRES_PRODUCTION}:${SERVICE_PORT_POSTGRES_PRODUCTION}/auth
+            GENERATE_DATABASE_URL: postgresql://postgres:${SERVICE_PASSWORD_POSTGRES_PRODUCTION}@${SERVICE_HOST_POSTGRES_PRODUCTION}:${SERVICE_PORT_POSTGRES_PRODUCTION}/generate
+            BILLING_DATABASE_URL: postgresql://postgres:${SERVICE_PASSWORD_POSTGRES_PRODUCTION}@${SERVICE_HOST_POSTGRES_PRODUCTION}:${SERVICE_PORT_POSTGRES_PRODUCTION}/billing
+            SENDGRID_API_KEY: ${SENDGRID_API_KEY_PRODUCTION}
+            AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID_PRODUCTION}
+            AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY_PRODUCTION}
+            AWS_REGION: ${AWS_REGION_PRODUCTION}
+            AWS_BUCKET_NAME: ${AWS_BUCKET_NAME_PRODUCTION}
+            AWS_BUCKET_REGION: ${AWS_BUCKET_REGION_PRODUCTION}
+            GOOGLE_OAUTH_CLIENT_ID: ${GOOGLE_OAUTH_CLIENT_ID_PRODUCTION}
+            GOOGLE_OAUTH_CLIENT_SECRET: ${GOOGLE_OAUTH_CLIENT_SECRET_PRODUCTION}
+            GOOGLE_OAUTH_CLIENT_REDIRECT_URI: ${GOOGLE_OAUTH_CLIENT_REDIRECT_URI_PRODUCTION}
+            JWT_SECRET: ${JWT_SECRET_PRODUCTION}
+            FRONTEND_URL: ${FRONTEND_URL_PRODUCTION}
+            REDIS_HOST: redis_container
+            REDIS_PORT: 6379
+        ports:
+            - "${SERVICE_PORT_FASTIFY_PRODUCTION:-8071}:8071"
+        depends_on:
+            - postgres
+            - redis
+
+volumes:
+    postgres_data:
+    pgadmin_data:
+    redis_data:

@@ -1,6 +1,4 @@
-/**
- * Copyright (c) 2020-2024, Social Image Ltd. All rights reserved.
- */
+
 
 import { withResult } from "@adventurai/shared-types";
 import { FastifyPluginAsyncZod } from "fastify-type-provider-zod";

@@ -1,8 +1,31 @@
 import { Queue, Worker } from "bullmq";
-import IORedis from "ioredis";
+import { Redis } from "ioredis";
 import { EmailArgs, sendEmail } from "src/utils/email.js";
 
-const connection = new IORedis.default({ maxRetriesPerRequest: null });
+const REDIS_HOST = process.env.REDIS_HOST || "localhost";
+const REDIS_PORT = parseInt(process.env.REDIS_PORT || "6379");
+const REDIS_PASSWORD = process.env.REDIS_PASSWORD || "";
+console.log(`Connecting to Redis at ${REDIS_HOST}:${REDIS_PORT}`);
+
+const connection = new Redis({
+	host: REDIS_HOST,
+	port: REDIS_PORT,
+	password: REDIS_PASSWORD,
+	maxRetriesPerRequest: null,
+	retryStrategy(times) {
+		const delay = Math.min(times * 50, 2000);
+		console.log(`Retrying Redis connection attempt ${times} after ${delay}ms`);
+		return delay;
+	},
+});
+
+connection.on('connect', () => {
+	console.log('Successfully connected to Redis');
+});
+
+connection.on('error', (error) => {
+	console.error('Redis connection error:', error);
+});
 
 type EmailQueueJobNames = "sendEmail";
 

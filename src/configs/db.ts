@@ -13,6 +13,11 @@ const envPath = path.join(
 	__dirname,
 	`../../.config/environments/.env.${process.env.ENV ?? "local"}`,
 );
+
+console.log("Auth database URL:", process.env.AUTH_DATABASE_URL);
+console.log("Billing database URL:", process.env.BILLING_DATABASE_URL);
+console.log("Generate database URL:", process.env.GENERATE_DATABASE_URL);
+
 dotenv.config({ path: envPath });
 
 const authConnectionPool = new pg.Pool({

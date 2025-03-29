@@ -1,6 +1,4 @@
-/**
- * Copyright (c) 2020-2024, Social Image Ltd. All rights reserved.
- */
+
 import Fastify from "fastify";
 import path, { join } from "path";
 import fastifyFavicon from "fastify-favicon";
@@ -36,10 +34,10 @@ fastify.listen({ port: Number(PORT), host: "0.0.0.0" }, (err, address) => {
 
 	console.log(`Server is running on ${address}`);
 });
-
 console.log(`Documentation running at http://localhost:${PORT}${DOCS_PATH}`);
 
 // Handle graceful shutdown
 process.on("exit", function () {
 	console.log("Server is shutting down");
 });
+	

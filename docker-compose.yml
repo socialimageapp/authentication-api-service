@@ -6,12 +6,9 @@ services:
         environment:
             POSTGRES_USER: postgres
             POSTGRES_PASSWORD: password
-        networks:
-            - my-net
-        ports:
-            - "5432:5432"
         volumes:
             - postgres_data:/var/lib/postgresql/data
+
     pgadmin:
         image: dpage/pgadmin4:latest
         container_name: pgadmin_container
@@ -19,8 +16,6 @@ services:
         environment:
             PGADMIN_DEFAULT_EMAIL: admin@admin.com
             PGADMIN_DEFAULT_PASSWORD: admin
-        networks:
-            - my-net
         ports:
             - "5050:80"
         depends_on:
@@ -32,31 +27,44 @@ services:
         image: redis:latest
         container_name: redis_container
         restart: always
-        hostname: redis
-        ports:
-            - "6379:6379"
         volumes:
             - redis_data:/data
-        networks:
-            - my-net
 
     redis-commander:
         image: rediscommander/redis-commander:latest
         container_name: redis_commander_container
-        hostname: redis-commander
         restart: always
         environment:
             REDIS_HOSTS: redis_container
         ports:
             - "8081:8081"
-        networks:
-            - my-net
         depends_on:
+            - redis
+
+    auth-service:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: fastify_auth_container
+        restart: always
+        environment:
+            PORT: 7071
+            AUTH_DATABASE_URL: postgresql://postgres:password@postgres:5432/auth
+            GENERATE_DATABASE_URL: postgresql://postgres:password@postgres:5432/generate
+            BILLING_DATABASE_URL: postgresql://postgres:password@postgres:5432/billing
+            GOOGLE_OAUTH_CLIENT_ID: 319099825360-85j9mqfbia25m3mlng0eok5gqhd7eo4t.apps.googleusercontent.com
+            GOOGLE_OAUTH_CLIENT_REDIRECT_URI: https://localhost:3000/auth/callback
+            REDIS_HOST: redis_container
+            REDIS_PORT: 6379
+            JWT_SECRET: 9LGI8l52AFJ3MU9zr3EG+eJhCnH/Bh+FDYTPRiuRbd3VRZU+MPMFieJGzaXKR4CUPQbIIMhRmLijjTfOu394pA==
+            FRONTEND_URL: http://localhost:3000
+        ports:
+            - "7071:7071"
+        depends_on:
+            - postgres
             - redis
 
 volumes:
     postgres_data:
     pgadmin_data:
     redis_data:
-networks:
-    my-net:

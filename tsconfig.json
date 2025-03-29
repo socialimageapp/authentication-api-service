@@ -15,7 +15,8 @@
 		"declarationMap": true,
 		"alwaysStrict": true,
 		"paths": {},
-		"forceConsistentCasingInFileNames": true
+		"forceConsistentCasingInFileNames": true,
+		"plugins": [{ "transform": "typescript-transform-paths" }]
 	},
 	"include": ["./src/**/*", "src/index.d.ts", ".config/**/*"],
 	"exclude": ["node_modules", "dist", "eslint.config.mjs"]

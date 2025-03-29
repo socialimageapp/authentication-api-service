@@ -17,7 +17,7 @@ import {
 } from "fastify-type-provider-zod";
 import helmet from "@fastify/helmet";
 import { NotFoundError, OrganizationSchema, UserSchema } from "@adventurai/shared-types";
-import config from "src/configs/api.js";
+import config, { Environment } from "src/configs/api.js";
 import registerRoutes from "src/routes/v1/register/index.js";
 import verifyRoutes from "src/routes/v1/verify/index.js";
 import loginRoutes from "src/routes/v1/login/google/callback/index.js";
@@ -33,7 +33,13 @@ import cookie from "@fastify/cookie";
 export const setupFastify = async (fastify: FastifyInstance) => {
 	const __filename = fileURLToPath(import.meta.url);
 	const __dirname = path.dirname(__filename);
-	const envPath = path.join(__dirname, "../.config/environments/.env.local");
+	const env = process.env.MODE as Environment | undefined;
+	if (!env) {
+		throw new Error("MODE env variable is not set");
+	}
+	
+	const envPath = path.join(__dirname, `../.config/environments/.env.${env}`);
+
 	dotenv.config({ path: envPath });
 
 	const DOCS_PATH = config.docsPath ?? "/documentation";
@@ -72,6 +78,8 @@ export const setupFastify = async (fastify: FastifyInstance) => {
 			},
 			servers: [
 				{ url: `http://127.0.0.1:${PORT}`, description: "Development server" },
+				{ url: `https://staging.app.adventur.ai/api/auth/v1`, description: "Staging server" },
+				{ url: `https://app.adventur.ai/api/auth/v1`, description: "Production server" },
 			],
 			tags: [
 				{
@@ -99,7 +107,7 @@ export const setupFastify = async (fastify: FastifyInstance) => {
 		},
 	});
 	await fastify.register(fastifyCors, {
-		origin: "*",
+		origin: [config.allowedOrigins],
 		methods: ["GET", "POST", "PUT", "PATCH", "OPTIONS", "DELETE"],
 		allowedHeaders: ["Content-Type", "Authorization"],
 		credentials: true,
